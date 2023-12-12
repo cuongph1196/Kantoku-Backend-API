@@ -1,2 +1,2 @@
-# UPNFLY
-phần mềm quản lý
+# Kantoku
+Phần mềm quản lý chấm công
