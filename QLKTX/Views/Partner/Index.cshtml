@@ -1,0 +1,629 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Danh sách đối tác";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Nhóm đối tác</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchPartnerGroup" class="easyui-combotree" autocomplete="off" data-options="animate:true, prompt:''" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="openCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS đối tác</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblPartner" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã đối tác</th>
+                                <th>Tên đối tác</th>
+                                <th>Số điện thoại</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="partnerModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Thêm/Cập nhật</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã đối tác (*)</label>
+                            <input type="text" id="txtPartnerCode" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            <input type="hidden" id="txtPartnerKey" class="form-control form-control-sm" autocomplete="off" readonly />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Tên đối tác (*)</label>
+                            <input type="text" id="txtPartnerName" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">CCCD/CMND (*)</label>
+                            <input type="text" id="txtIdentityID" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Ngày cấp (*)</label>
+                            <div class="input-group date">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                </div>
+                                <input id="txtIdentityDateIssue" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Nơi cấp (*)</label>
+                            <input type="text" id="txtIdentityPlaceIssue" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Địa chỉ</label>
+                            <input type="text" id="txtPartnerAddress" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Số điện thoại</label>
+                            <input type="text" id="txtPartnerPhone" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã số thuế</label>
+                            <input type="text" id="txtPartnerTaxNumber" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Tên đóng thuế</label>
+                            <input type="text" id="txtPartnerTaxName" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Địa chỉ đóng thuế</label>
+                            <input type="text" id="txtPartnerTaxAddress" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Nhóm đối tác (*)</label>
+                            <div class="">
+                                <input type="text" id="cboPartnerGroup" name="cboPartnerGroup" class="easyui-combotree entry_required" autocomplete="off" data-options="animate:true, prompt:''" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Dự án (*)</label>
+                            <div class="">
+                                <input type="text" id="cboBuilding" name="cboBuilding" class="easyui-combobox entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Diễn giải</label>
+                            <input type="text" id="txtDescription" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã NFC</label>
+                            <input type="text" id="txtNFCCode" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col-sm-3">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbIsEmployee">
+                            <label class="form-check-label" for="cbIsEmployee">Nhân viên</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbIsCustomer">
+                            <label class="form-check-label" for="cbIsCustomer">Khách hàng</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbIsVendor">
+                            <label class="form-check-label" for="cbIsVendor">Nhà cung cấp</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-3">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbActive">
+                            <label class="form-check-label" for="cbActive">Sử dụng</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <div id="divCreate" class="form-group">
+                    <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+                </div>
+                <div id="divUpdate" class="form-group" style="display:none;">
+                    <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var lstPartnerList = [];
+        var partnerSearchModel = {
+            SearchParams: null,
+            PartnerGroupkey: null
+        };
+        var objCombo = {
+            cboPartnerGroupData: [],
+            cboBuildingData: []
+        };
+
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            initCombo();
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboPartnerGroupData = getDataComboTree(ProjectCF.configs.baseApi + "/Common/combotree/partner-group");
+            initComboTree(objCombo.cboPartnerGroupData, "cboSearchPartnerGroup", false, 300, null);
+            initComboTree(objCombo.cboPartnerGroupData, "cboPartnerGroup", true, 300, null);
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboBuilding', true, 300);
+            $.ajaxSettings.async = true;
+        }
+
+        function onSearchPaging() {
+            partnerSearchModel.SearchParams = $("[id=txtSearch]").val().trim();
+            partnerSearchModel.PartnerGroupkey = $("[id=cboSearchPartnerGroup]").combotree("getValue"),
+            BindingDataTableFL();
+        }
+
+        function BindingDataTableFL() {
+            $("#tblPartner").DataTable().destroy();
+            $("#tblPartner tbody").empty(); // empty tbody
+            $("#tblPartner").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/Partner/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.SearchParams = partnerSearchModel.SearchParams;
+                        dataSearch.PartnerGroupkey = partnerSearchModel.PartnerGroupkey;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        lstPartnerList = json.data;
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "PartnerCode", "sortable": true },
+                    { "data": "PartnerName", "sortable": true },
+                    { "data": "PartnerPhone", "sortable": false },
+                    { "data": "Description", "sortable": false },
+                    {
+                        "data": "Active", "sortable": false,
+                        "className": "text-center",
+                        "width": 150,
+                        "render": function (data, type, full, meta) {
+                            return full.Active
+                                ? `<span class="label label-sm label-info-bt arrowed arrowed-righ">Sử dụng</span>`
+                                : `<span class="label label-sm label-danger arrowed arrowed-righ">Không sử dụng</span>`;
+                        }
+                    },
+                    {
+                        "className": "text-center project-actions text-right",
+                        "sortable": false,
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            var actionStr = "";
+                            if (full.PartnerKey) {
+                                actionStr = `<button class="btn btn-info btn-xs" onclick = "openEdit(event, '${full.PartnerKey}')"> <i class="fas fa-pencil-alt"> </i> Sửa </button>&nbsp;`;
+                                actionStr += `<button class="btn btn-danger btn-xs" onclick = "onDelete(event, '${full.PartnerKey}')"> <i class="fas fa-trash" @(Model.FUPermiss.FDel ? "" : "disabled")> </i> Xóa </button>&nbsp;`;
+                            }
+                            return actionStr;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidCombo = ValidateComboForm();
+            if (!isValidForm || !isValidCombo) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            PartnerKey: $("[id=txtPartnerKey]").val() ? getInt($('[id$=txtPartnerKey]').val()) : null,
+                            PartnerCode: $("[id=txtPartnerCode]").val(),
+                            PartnerName: $("[id=txtPartnerName]").val(),
+                            IdentityID: $("[id=txtIdentityID]").val(),
+                            IdentityDateIssue: $("[id=txtIdentityDateIssue]").val(),
+                            IdentityPlaceIssue: $("[id=txtIdentityPlaceIssue]").val(),
+                            Description: $("[id=txtDescription").val(),
+                            PartnerAddress: $("[id=txtPartnerAddress").val(),
+                            PartnerPhone: $("[id=txtPartnerPhone").val(),
+                            PartnerTaxNumber: $("[id=txtPartnerTaxNumber").val(),
+                            PartnerTaxName: $("[id=txtPartnerTaxName").val(),
+                            PartnerTaxAddress: $("[id=txtPartnerTaxAddress").val(),
+                            PartnerGroupkey: $("[id=cboPartnerGroup]").combotree("getValue"),
+                            IsEmployee: $("[id=cbIsEmployee]").prop("checked"),
+                            IsCustomer: $("[id=cbIsCustomer]").prop("checked"),
+                            IsVendor: $("[id=cbIsVendor]").prop("checked"),
+                            Active: $("[id=cbActive]").prop("checked"),
+                            NFCCode: $("[id=txtNFCCode]").val(),
+                            BuildingKey: $("[id=cboBuilding]").combobox("getValue")
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidCombo = ValidateComboForm();
+            if (!isValidForm || !isValidCombo) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            PartnerKey: $("[id=txtPartnerKey]").val() ? getInt($('[id$=txtPartnerKey]').val()) : null,
+                            PartnerCode: $("[id=txtPartnerCode]").val(),
+                            PartnerName: $("[id=txtPartnerName]").val(),
+                            IdentityID: $("[id=txtIdentityID]").val(),
+                            IdentityDateIssue: $("[id=txtIdentityDateIssue]").val(),
+                            IdentityPlaceIssue: $("[id=txtIdentityPlaceIssue]").val(),
+                            Description: $("[id=txtDescription").val(),
+                            PartnerAddress: $("[id=txtPartnerAddress").val(),
+                            PartnerPhone: $("[id=txtPartnerPhone").val(),
+                            PartnerTaxNumber: $("[id=txtPartnerTaxNumber").val(),
+                            PartnerTaxName: $("[id=txtPartnerTaxName").val(),
+                            PartnerTaxAddress: $("[id=txtPartnerTaxAddress").val(),
+                            PartnerGroupkey: $("[id=cboPartnerGroup]").combotree("getValue"),
+                            IsEmployee: $("[id=cbIsEmployee]").prop("checked"),
+                            IsCustomer: $("[id=cbIsCustomer]").prop("checked"),
+                            IsVendor: $("[id=cbIsVendor]").prop("checked"),
+                            Active: $("[id=cbActive]").prop("checked"),
+                            NFCCode: $("[id=txtNFCCode]").val(),
+                            BuildingKey: $("[id=cboBuilding]").combobox("getValue")
+                        };
+                        CallAjaxSave("Update", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function resetFormData() {
+            $("[id=divCreate]").css("display", "");
+            $("[id=divUpdate]").css("display", "none");
+            $("[id=txtPartnerCode]").prop("readonly", false);
+            $("[id=partnerModal]").find("input[type=text],input[type=number], textarea").val("");
+            $("[id=partnerModal]").find("input[type=checkbox]").prop("checked", true);
+            $('[id$=cboPartnerGroup').combotree('setValue', null);
+            $('[id$=cboBuilding').combobox('setValue', null);
+        };
+
+        function setFormData(data) {
+            $("[id=divCreate]").css("display", "none");
+            $("[id=divUpdate]").css("display", "");
+            //$("[id=txtPartnerCode]").prop("readonly", false);
+            $('[id$=txtPartnerKey]').val(data.PartnerKey);
+            $('[id$=txtPartnerCode]').val(data.PartnerCode);
+            $('[id$=txtPartnerName]').val(data.PartnerName);
+            $('[id$=txtIdentityID]').val(data.IdentityID);
+            $('[id$=txtIdentityDateIssue]').val(data.IdentityDateIssue);
+            $('[id$=txtIdentityPlaceIssue]').val(data.IdentityPlaceIssue);
+            $('[id$=txtDescription]').val(data.Description);
+            $('[id$=txtPartnerAddress]').val(data.PartnerAddress);
+            $('[id$=txtPartnerPhone]').val(data.PartnerPhone);
+            $('[id$=txtPartnerTaxNumber]').val(data.PartnerTaxNumber);
+            $('[id$=txtPartnerTaxName]').val(data.PartnerTaxName);
+            $('[id$=txtPartnerTaxAddress]').val(data.PartnerTaxAddress);
+            $("[id$=cbIsEmployee]").prop('checked', data.IsEmployee);
+            $("[id$=cbIsCustomer]").prop('checked', data.IsCustomer);
+            $("[id$=cbIsVendor]").prop('checked', data.IsVendor);
+            $("[id$=cbActive]").prop('checked', data.Active);
+            $("[id$=txtNFCCode]").val(data.NFCCode);
+            $("[id$=cboPartnerGroup]").combotree({
+                onLoadSuccess: function () {
+                    $('[id$=cboPartnerGroup').combotree('setValue', data.PartnerGroupkey);
+                }
+            });
+            $("[id$=cboBuilding]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuilding').combobox('setValue', data.BuildingKey);
+                }
+            });
+        };
+
+        function onDelete(e, id) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/Partner/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    $('#partnerModal').modal('hide');
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    $('#partnerModal').modal('hide');
+                                    break;
+                            };
+
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblPartner").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDelete(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/Partner/Delete/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblPartner").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function GetPartnerGroupById(id) {
+            try {
+                $.ajax({
+                    type: "GET",
+                    url: "/Partner/GetById/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            setFormData(msg.Data);
+                            $('#partnerModal').modal('show');
+                        } else {
+                            toastr.error(VNMessageR.COMMON_00015);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err); ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        //open modal
+        function openCreateNew() {
+            resetFormData();
+            $('#partnerModal').modal('show');
+        }
+
+        function openEdit(e, id) {
+            resetFormData();
+            GetPartnerGroupById(id);
+        }
+
+
+        //Valid
+        function ValidateComboForm() {
+            var flag = true;
+            let isBuildingValid = $("[id$=cboBuilding]").combobox("isValid");
+            let isPartnerGroupValid = $("[id$=cboPartnerGroup]").combotree("isValid");
+            if (isBuildingValid) {
+                $("input[name='cboBuilding']").closest("span.combo").css("border-color", "#D5D5D5");
+            } else {
+                flag = false;
+                $("input[name='cboBuilding']").closest("span.combo").css("border-color", "red");
+            }
+            if (isPartnerGroupValid) {
+                $("input[name='cboPartnerGroup']").closest("span.combo").css("border-color", "#D5D5D5");
+            } else {
+                flag = false;
+                $("input[name='cboPartnerGroup']").closest("span.combo").css("border-color", "red");
+            }
+            return flag;
+        }
+
+    </script>
+}

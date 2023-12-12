@@ -1,0 +1,126 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Khóa sổ hệ thống";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Ngày khóa sổ</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtClosingDate" type="text" class="form-control form-control-sm date-picker" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSaveClosingDate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")><i class="fa fa-save"></i> Lưu</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            GetClosingDate("ClosingDate");
+            $.ajaxSettings.async = true;
+        });
+
+        function GetClosingDate(systemVar) {
+            ajaxindicatorstart(VNMessageR.COMMON_00011);
+            try {
+                $.ajax({
+                    type: "GET",
+                    url: `/ClosingDate/GetById?id=${systemVar}`,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.Success) {
+                            $("[id=txtClosingDate]").val(moment(result.Data.SystemVarValue, "YYYYMMDD").format("DD/MM/YYYY"));
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function onSaveClosingDate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            SystemVarID: "ClosingDate",
+                            SystemVarValue: moment($("[id=txtClosingDate]").val(), "DD/MM/YYYY").format("YYYYMMDD"),
+                        };
+                        CallAjaxSave("Update",objSave);
+                    }
+                });
+            return false;
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "PUT",
+                    url: "/ClosingDate/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00003);
+                            GetClosingDate("ClosingDate");
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+    </script>
+}

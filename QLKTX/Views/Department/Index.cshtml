@@ -1,0 +1,502 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Danh sách Mặt bằng/Ki-ốt";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Dự án</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuilding" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Khu vực</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuildingSection" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="openCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS Mặt bằng/Ki-ốt</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblDepartment" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã Mặt bằng/Ki-ốt</th>
+                                <th>Tên Mặt bằng/Ki-ốt</th>
+                                <th>Dự án</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="departmentModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Thêm/Cập nhật</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã Mặt bằng/Ki-ốt</label>
+                            <input type="text" id="txtDepartmentCode" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            <input type="hidden" id="txtDepartmentKey" class="form-control form-control-sm" autocomplete="off" readonly />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Tên Mặt bằng/Ki-ốt</label>
+                            <input type="text" id="txtDepartmentName" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Dự án</label>
+                            <div class="">
+                                <input type="text" id="cboBuilding" class="easyui-combobox entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Khu vực</label>
+                            <div class="">
+                                <input type="text" id="cboBuildingSection" class="easyui-combobox entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mô tả</label>
+                            <input type="text" id="txtDescription" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Giá</label>
+                            <input type="text" id="txtPrice" class="form-control form-control-sm clsMoney" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbActive">
+                            <label class="form-check-label" for="cbActive">Sử dụng</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <div id="divCreate" class="form-group">
+                    <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+                </div>
+                <div id="divUpdate" class="form-group" style="display:none;">
+                    <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var lstDepartmentList = [];
+        var funcSearchModel = {
+            SearchParams: null,
+            BuildingKey: null,
+            BuildingSectionKey: null
+        };
+        var objCombo = {
+            cboBuildingData: [],
+            cboBuildingSectionData: []
+        };
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            initCombo();
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', false, 300);
+            initComboBox(objCombo.cboBuildingData, 'cboBuilding', false, 300);
+            $.ajaxSettings.async = true;
+            $("[id=cboSearchBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboSearchBuildingSection', false, 300);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboSearchBuildingSection', false, 300);
+                }
+            });
+            $("[id=cboBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboBuildingSection', false, 300);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboBuildingSection', false, 300);
+                }
+            });
+        }
+
+        function onSearchPaging() {
+            funcSearchModel.SearchParams = $("[id=txtSearch]").val().trim();
+            funcSearchModel.BuildingKey = $("[id=cboSearchBuilding]").combobox("getValue");
+            funcSearchModel.BuildingSectionKey = $("[id=cboSearchBuildingSection]").combobox("getValue");
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblDepartment").DataTable().destroy();
+            $("#tblDepartment tbody").empty(); // empty tbody
+            $("#tblDepartment").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/Department/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.SearchParams = funcSearchModel.SearchParams;
+                        dataSearch.BuildingKey = funcSearchModel.BuildingKey;
+                        dataSearch.BuildingSectionKey = funcSearchModel.BuildingSectionKey;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        lstDepartmentList = json.data;
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": '3%',
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "DepartmentCode", "sortable": true, "width": '10%' },
+                    { "data": "DepartmentName", "sortable": true, "width": '20%' },
+                    { "data": "BuildingName", "sortable": false, "width": '20%' },
+                    { "data": "Description", "sortable": false, "width": '25%' },
+                    {
+                        "data": "Active", "sortable": false,
+                        "className": "text-center",
+                        "width": '10%',
+                        "render": function (data, type, full, meta) {
+                            return full.Active
+                                ? `<span class="label label-sm label-info-bt arrowed arrowed-righ">Sử dụng</span>`
+                                : `<span class="label label-sm label-danger arrowed arrowed-righ">Không sử dụng</span>`;
+                        }
+                    },
+                    {
+                        "className": "text-center project-actions text-right",
+                        "sortable": false,
+                        "width": '12%',
+                        "render": function (data, type, full, meta) {
+                            var actionStr = "";
+                            if (full.DepartmentKey) {
+                                actionStr = `<button class="btn btn-info btn-xs" onclick = "openEdit(event, '${full.DepartmentKey}')"> <i class="fas fa-pencil-alt"> </i> Sửa </button>&nbsp;`;
+                                actionStr += `<button class="btn btn-danger btn-xs" onclick = "onDelete(event, '${full.DepartmentKey}')" @(Model.FUPermiss.FDel ? "" : "disabled")> <i class="fas fa-trash"> </i> Xóa </button>&nbsp;`;
+                            }
+                            return actionStr;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            DepartmentCode: $("[id=txtDepartmentCode]").val(),
+                            DepartmentName: $("[id=txtDepartmentName]").val(),
+                            Description: $("[id=txtDescription]").val(),
+                            BuildingKey: $("[id=cboBuilding]").combobox("getValue"),
+                            BuildingSectionKey: $("[id=cboBuildingSection]").combobox("getValue"),
+                            Price: $("[id=txtPrice]").val() === "" ? 0 : accounting.unformat($("[id=txtPrice]").val()),
+                            Active: $("[id=cbActive]").prop("checked")
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            DepartmentKey: $("[id=txtDepartmentKey]").val(),
+                            DepartmentCode: $("[id=txtDepartmentCode]").val(),
+                            DepartmentName: $("[id=txtDepartmentName]").val(),
+                            Description: $("[id=txtDescription]").val(),
+                            BuildingKey: $("[id=cboBuilding]").combobox("getValue"),
+                            BuildingSectionKey: $("[id=cboBuildingSection]").combobox("getValue"),
+                            Price: $("[id=txtPrice]").val() === "" ? 0 : accounting.unformat($("[id=txtPrice]").val()),
+                            Active: $("[id=cbActive]").prop("checked")
+                        };
+                        CallAjaxSave("Update", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function resetFormData() {
+            $("[id=divCreate]").css("display", "");
+            $("[id=divUpdate]").css("display", "none");
+            $("[id$=txtDepartmentCode]").prop("readonly", false);
+            $("[id=departmentModal]").find("input[type=text],input[type=number], textarea").val("");
+            $("[id=departmentModal]").find("input[type=checkbox]").prop("checked", true);
+            $('[id$=cboBuilding').combobox('setValue', null);
+            $('[id$=cboBuildingSection').combobox('setValue', null);
+        };
+
+        function setFormData(data) {
+            $("[id=divCreate]").css("display", "none");
+            $("[id=divUpdate]").css("display", "");
+            //$("[id$=txtDepartmentCode]").prop("readonly", false);
+            $('[id$=txtDepartmentKey]').val(data.DepartmentKey);
+            $('[id$=txtDepartmentCode]').val(data.DepartmentCode);
+            $('[id$=txtDepartmentName]').val(data.DepartmentName);
+            $('[id$=txtDescription]').val(data.Description);
+            $("[id$=cbActive]").prop('checked', data.Active);
+            $("[id$=txtPrice]").val(accounting.formatNumber(data.Price));
+            $("[id$=cboBuilding]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuilding').combobox('setValue', data.BuildingKey);
+                }
+            });
+            $("[id$=cboBuildingSection]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuildingSection').combobox('setValue', data.BuildingSectionKey);
+                }
+            });
+        };
+
+        function onDelete(e, id) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/Department/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    $('#departmentModal').modal('hide');
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    $('#departmentModal').modal('hide');
+                                    break;
+                            };
+
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblDepartment").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDelete(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/Department/Delete/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblDepartment").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        //open modal
+        function openCreateNew() {
+            resetFormData();
+            $('#departmentModal').modal('show');
+        }
+
+        function openEdit(e, id) {
+            resetFormData();
+            var data = lstDepartmentList.find(x => x.DepartmentKey == id);
+            setFormData(data);
+            $('#departmentModal').modal('show');
+        }
+
+    </script>
+}

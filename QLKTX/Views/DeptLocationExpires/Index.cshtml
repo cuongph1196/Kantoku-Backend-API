@@ -1,0 +1,403 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Cảnh báo theo sơ đồ";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Dự án:</label>
+                                <div class="">
+                                    <input type="text" id="cboBuilding" class="easyui-combobox form-control-sm search_required" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Khu vực:</label>
+                                <div class="">
+                                    <input type="text" id="cboBuildingSection" class="easyui-combobox form-control-sm search_required upload_required" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="GetAllLocation(event)"><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <figure class="highcharts-figure">
+            <div id="container"></div>
+            <p class="highcharts-description">
+                @*zvx*@
+            </p>
+        </figure>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var searchRequiredList = document.getElementsByClassName("search_required");
+        var uploadRequiredList = document.getElementsByClassName("upload_required");
+        var deptRequiredList = document.getElementsByClassName("dept_required");
+        var FunctionID = "@Model.FunctionID";
+        var WE = 200;
+        var HE = 200;
+        var locationSearchModel = {
+            BuildingKey: null,
+            BuildingSectionKey: null
+        };
+        var objCombo = {
+            cboDepartmentData: [],
+            cboBuildingData: [],
+            cboBuildingSectionData: []
+        };
+
+        var objMaster = {
+            BuildingKey: null,
+            BuildingSectionKey: null
+        };
+
+        $(document).ready(async function () {
+            //init upload file
+            bsCustomFileInput.init();
+            $.ajaxSettings.async = false;
+            initCombo();
+            //GetAllLocation();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboBuilding', false, 300);
+            initComboBox(objCombo.cboBuildingData, 'cboDBuilding', false, 300);
+            initComboBox([], 'cboBuildingSection', false, 300);
+            initComboBox([], 'cboDepartment', false, 300);
+            $.ajaxSettings.async = true;
+            $("[id=cboBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboBuildingSection', false, 300);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboDBuildingSection', false, 300);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboBuildingSection', false, 300);
+                    initComboBox([], 'cboDBuildingSection', false, 300);
+                }
+            });
+
+            $("[id=cboBuildingSection]").combobox({
+                onSelect: function (record) {
+                    var buildKey = $("[id=cboBuilding]").combobox("getValue");
+                    objCombo.cboDepartmentData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/department-by-building?buildKey=${buildKey}&buildSectionKey=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboDepartmentData, 'cboDepartment', false, 300);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboDepartment', false, 300);
+                }
+            });
+        }
+
+        function reloadComBoDepartment() {
+            var buildKey = $("[id=cboBuilding]").combobox("getValue");
+            var buildSectionKey = $("[id=cboBuildingSection]").combobox("getValue");
+            objCombo.cboDepartmentData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/department-by-building?buildKey=${buildKey}&buildSectionKey=${buildSectionKey}&active=1`);
+            $("#cboDepartment").combobox('loadData', objCombo.cboDepartmentData);
+        }
+
+        function drawMarkerChart(data, imgData) {
+            //const annoatationsLabels = data.map(el => ({
+            //    point: el.id,
+            //    text: '{point.label}'
+            //}));
+            // Plugin to add a pulsating marker on add point
+            Highcharts.addEvent(Highcharts.Series, 'addPoint', e => {
+                const point = e.point,
+                    series = e.target;
+
+                if (!series.pulse) {
+                    series.pulse = series.chart.renderer.circle()
+                        .add(series.markerGroup);
+                }
+                setTimeout(() => {
+                    series.pulse
+                        .attr({
+                            x: series.xAxis.toPixels(point.x, true),
+                            y: series.yAxis.toPixels(point.y, true),
+                            r: series.options.marker.radius,
+                            opacity: 1,
+                            fill: series.color
+                        })
+                        .animate({
+                            r: 20,
+                            opacity: 0
+                        }, {
+                            duration: 1000
+                        });
+                }, 1);
+            });
+
+            Highcharts.chart('container', {
+                //annotations: [{
+                //    labels: annoatationsLabels,
+                //    labelOptions: {
+                //        x: -10,
+                //        y: -5
+                //    }
+                //}],
+                chart: {
+                    type: 'scatter',
+                    //margin: [70, 50, 60, 80],
+                    //plotBackgroundImage: 'https://localhost:7214/assets/img/photo_contruction.jpg',
+                    plotBackgroundImage: 'data:image/png;base64,' + imgData,
+                    //minPadding: 0.2,
+                    //maxPadding: 0.2,
+                    //maxZoom: 60,
+                    animation: {
+                        duration: 200
+                    },
+                    plotShadow: true,
+                    events: {
+                        //render: function () {
+                        //    var image = this.renderer.image('https://www.highcharts.com/samples/graphics/skies.jpg', 170, 120, 20, 20);
+                        //    image.add();
+                        //    image.on('load', function () {
+                        //        highexp.done();
+                        //    });
+                        //},
+                        //render: function () {
+                        //    const chart = this,
+                        //        bgBBox = chart.plotBackground.getBBox();
+
+                        //    if (!chart.bgImage) {
+                        //        chart.bgImage = chart.renderer.image('https://www.highcharts.com/samples/graphics/skies.jpg', 0, 0, 200, 100).add();
+                        //    }
+
+                        //    chart.bgImage.attr({
+                        //        x: bgBBox.x,
+                        //        y: bgBBox.y + bgBBox.height - 100
+                        //    });
+                        //},
+                        //click: function (e) {
+                        //    // find the clicked values and the series
+                        //    //resetDataModel();
+                        //    const x = Math.round(e.xAxis[0].value),
+                        //        y = Math.round(e.yAxis[0].value),
+                        //        series = this.series[0];
+
+                        //    // Add it
+                        //    series.addPoint([x, y]);
+
+                        //}
+                    },
+                    //panKey: "ctrl",
+                    //panning: true,
+                    //zoomKey: "ctrl",
+                    //zoomType: 'xy',
+                    //rangeSelector: {
+                    //    selected: 1
+                    //},
+                    zooming: {
+                        mouseWheel: false
+                    }
+                    //zooming: {
+                    //    mouseWheel: true,
+                    //    mouseWheel: {
+                    //        type: 'xy',
+                    //        sensitivity: 1.03
+                    //    }
+                    //}
+                },
+                title: {
+                    text: 'Cấu trúc dự án',
+                    align: 'left'
+                },
+                subtitle: {
+                    text: '',
+                    align: 'left'
+                },
+                //accessibility: {
+                //    announceNewData: {
+                //        enabled: true
+                //    }
+                //},
+                xAxis: {
+                    min: 0,
+                    max: 100,
+                    visible: false,
+                    gridLineWidth: 1,
+                    minPadding: 0,
+                    maxPadding: 0,
+                    maxZoom: 0,
+                },
+                yAxis: {
+                    min: 0,
+                    max: 100,
+                    visible: false,
+                    //title: {
+                    //    text: 'Value'
+                    //},
+                    minPadding: 0,
+                    maxPadding: 0,
+                    maxZoom: 0,
+                    plotLines: [{
+                        value: 0,
+                        width: 1,
+                        color: '#808080'
+                    }]
+                },
+                legend: {
+                    enabled: false
+                },
+                exporting: {
+                    enabled: false
+                },
+                plotOptions: {
+                    series: {
+                        stickyTracking: false,
+                        lineWidth: 0, //set width line
+                        point: {
+                            events: {
+                                click: function (e) {
+                                    if (e.point.id && e.point.label) {
+                                        //open link lk
+                                        OpenByUrl(44, "&partnerCode=" + e.point.partnerCode);
+                                    }
+                                    //if (this.series.data.length > 1) {
+                                    //this.remove();
+                                    //}
+                                }
+                            }
+                        }
+                    }
+                },
+                credits: {
+                    enabled: false
+                },
+                tooltip: {
+                    animation: true,
+                    headerFormat: '<b>{point.label}</b><br/>',
+                    pointFormat: '<span style="color:{series.color}"><b>{point.label}</b></span><br/>',
+                    shared: true,
+                    style: {
+                        fontSize: '12px'
+                    }
+                },
+                series: [{
+                    //data: [[20, 20], [80, 80]],
+                    data: data,
+                    color: Highcharts.getOptions().colors[3],
+                    marker: {
+                        lineWidth: 1,
+                        radius: 8
+                    }
+                }],
+                lang: {
+                    noData: ""
+                },
+                noData: {
+                    style: {
+                        fontWeight: 'bold',
+                        fontSize: '15px',
+                        color: '#303030'
+                    }
+                }
+            });
+
+        }
+
+        function GetAllLocation() {
+            toastr.remove();
+            let isValidForm = ValidateControlForm(searchRequiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            try {
+                let objParams = {
+                    BuildingKey: $("[id=cboBuilding]").combobox("getValue"),
+                    BuildingSectionKey: $("[id=cboBuildingSection]").combobox("getValue")
+                };
+                objMaster = objParams;
+                $.ajax({
+                    type: "GET",
+                    url: "/DeptLocationExpires/GetLocation",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    data: objParams,
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            var imgData = msg.Data?.BuildSImage;
+                            var data = msg.Data?.DeptLocations;
+                            var locationData = [];
+                            data.forEach((el) => {
+                                var objData = {
+                                    id: el.ID.toString(),
+                                    //label: el.DepartmentCode + "_" + el.DepartmentName,
+                                    label: el.Description ? el.Description : (el.DepartmentCode + "_" + el.DepartmentName),
+                                    x: el.xAxis,
+                                    y: el.yAxis,
+                                    color: el.ColorCode,
+                                    partnerCode: el.PartnerCode
+                                };
+                                locationData.push(objData);
+                            });
+                            drawMarkerChart(locationData, imgData);
+                        } else {
+                            drawMarkerChart([]);
+                            toastr.warning(VNMessageR.COMMON_00015);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err); ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function GetLocationById(id) {
+            try {
+                $.ajax({
+                    type: "GET",
+                    url: "/DeptLocationExpires/GetByID/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            setDataUpdateModel(msg.Data);
+                            $('#locationModal').modal('show');
+                        } else {
+                            toastr.warning(VNMessageR.COMMON_00015);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err); ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+    </script>
+}

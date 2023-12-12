@@ -1,0 +1,547 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Danh mục cơ cấu tổ chức";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchDepartment()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="openCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>
+                    <button type="button" class="btn btn-sm btn-info" onclick="openUpdate(event)"><i class="fas fa-pen-square"></i> Cập nhật</button>
+                    <button type="button" class="btn btn-sm btn-danger" onclick="onDelete(event)" @(Model.FUPermiss.FDel ? "" : "disabled")><i class="fas fa-trash-alt"></i> Xóa</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Cơ cấu tổ chức</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblCompanyStructure" class="easyui-treegrid table-data" title="" style="height: 500px;"></table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="compModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Thêm/Cập nhật</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã cơ cấu tổ chức (*)</label>
+                            <input type="text" id="txtCompanyStructureCode" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            <input type="hidden" id="txtCompanyStructureKey" class="form-control form-control-sm" autocomplete="off" readonly />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Tên cơ cấu tổ chức (*)</label>
+                            <input type="text" id="txtCompanyStructureName" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Cơ cấu tổ chức cha</label>
+                            <div class="">
+                                <input type="text" id="cboCompanyStructureParent" class="easyui-combotree" autocomplete="off" data-options="animate:true, prompt:''" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Phân cấp tổ chức (*)</label>
+                            <div class="">
+                                <input type="text" id="cboLevelCompanyStructure" class="easyui-combotree entry_required" autocomplete="off" data-options="animate:true, prompt:''" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Diễn giải</label>
+                            <input type="text" id="txtDescription" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbActive">
+                            <label class="form-check-label" for="cbActive">Sử dụng</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <div id="divCreate" class="form-group">
+                    <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+                </div>
+                <div id="divUpdate" class="form-group" style="display:none;">
+                    <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var lstCompList = [];
+        var compSearchModel = {
+            SearchParams: null
+        };
+        var objCombo = {
+            cboCompanyStructureSearchData: [],
+            cboCompanyStructureData: [],
+            cboLevelCompanyStructureData: []
+        };
+
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            initCombo();
+            onSearchDepartment();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboLevelCompanyStructureData = getDataCombobox(ProjectCF.configs.baseApi + "/Common/combotree/level-company-structure");
+            intitCombotreeDataDepartment();
+            intitCombotreeDataDepartmentLevel(objCombo.cboLevelCompanyStructureData, null, null);
+
+            $.ajaxSettings.async = true;
+        }
+
+        function intitCombotreeDataDepartment() {
+            objCombo.cboCompanyStructureData = getDataComboTree(ProjectCF.configs.baseApi + "/Common/combotree/company-structure");
+            $.when(objCombo.cboCompanyStructureData)
+                .done(function (dataCompanyStructure) {
+
+                    $("#cboCompanyStructureParent").combotree({
+                        data: dataCompanyStructure,
+                        panelHeight: 300,
+                        icons: [
+                            {
+                                iconCls: "icon-clear",
+                                handler: function (e) {
+                                    $(e.data.target).combotree("clear");
+                                }
+                            }
+                        ],
+                        onSelect: onSelectDepartmentParent,
+                        onChange: onChangeDepartmentParent
+                    });
+
+                })
+                .fail(function (jqXHR, textStatus, errorThrown) {
+                    // If fail
+                    console.log(textStatus + ": " + errorThrown);
+                });
+        }
+
+        function intitCombotreeDataDepartmentLevel(data, filter, defaultValue) {
+            if (data.length > 0) {
+                let dataDepartmentLevel = data.filter(x => x.ParentId === filter);
+                let objDataBefore = [];
+                $.each(dataDepartmentLevel,
+                    function (i, item) {
+                        objDataBefore.push({
+                            id: item.Id,
+                            text: item.NameCompare,
+                            parentid: item.ParentId,
+                            name: item.Name
+                        });
+                    });
+
+                let objDataAfter = convertToTreeData(objDataBefore);
+                initComboTreeSelectParent(objDataAfter, "cboLevelCompanyStructure", true, 300, defaultValue);
+            } else {
+                initComboTreeSelectParent([], "cboLevelCompanyStructure", false, 300);
+            }
+        }
+
+        function onSelectDepartmentParent(node) {
+            if (node.levelid !== null && node.levelid !== "") {
+                intitCombotreeDataDepartmentLevel(objCombo.cboLevelCompanyStructureData, node.levelid, null);
+            } else {
+                intitCombotreeDataDepartmentLevel(objCombo.cboLevelCompanyStructureData, null, null);
+            }
+        }
+
+        function onChangeDepartmentParent(oldVal) {
+            if (oldVal === "") {
+                intitCombotreeDataDepartmentLevel(objCombo.cboDepartmentLevelData, null, null);
+            }
+        }
+
+        function LoadDataTreeDepartment(data) {
+            var dataConvert = [];
+            $.each(data,
+                function (i, item) {
+                    dataConvert.push({
+                        id: item.CompanyStructureKey,
+                        code: item.CompanyStructureCode,
+                        name: item.CompanyStructureName,
+                        text: item.CompanyStructureCode + " - " + item.CompanyStructureName,
+                        parentid: item.CompanyStructureParent,
+                        notes: item.Description,
+                        levelid: item.LevelCompanyStructureKey,
+                        active: item.Active
+                    });
+                });
+
+            objCombo.cboCompanyStructureSearchData = convertToTreeData(dataConvert);
+
+            $("[id=tblCompanyStructure]").treegrid({
+                lines: true,
+                rownumbers: false,
+                animate: false,
+                collapsible: false,
+                fitColumns: false,
+                idField: "id",
+                treeField: "name",
+                data: objCombo.cboCompanyStructureSearchData,
+                columns: [
+                    [
+                        {
+                            title: 'Cơ cấu tổ chức',
+                            width: 400,
+                            field: "name",
+                            align: "left"
+                        },
+                        {
+                            title: 'Chi tiết',
+                            width: 300,
+                            field: "text",
+                            align: "left"
+                        },
+                        {
+                            title: 'Mô tả',
+                            width: 300,
+                            field: "notes",
+                            align: "left"
+                        },
+                        {
+                            title: 'Trạng thái',
+                            width: 100,
+                            field: "active",
+                            align: "left",
+                            formatter: function (value, row) {
+                                return value === true
+                                    ? 'Hoạt động':'Không hoạt động';
+                            }
+                        }
+                    ]
+                ]
+            });
+        }
+
+        function onSearchDepartment() {
+            toastr.remove();
+            try {
+                var objSearchDepartment = {
+                    SearchParams: $("[id=txtSearch]").val()
+                };
+
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "GET",
+                    url: "/CompanyStructure/SearchAll",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: objSearchDepartment,
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            LoadDataTreeDepartment(msg.Data.Items);
+                        } else {
+                            LoadDataTreeDepartment([]);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function openUpdate(e) {
+            e.preventDefault();
+            resetFormData();
+            GetDepartmentById();
+            setTimeout(function () {
+                $('#compModal').modal('show');
+            }, 100);
+        }
+
+        function GetDepartmentById() {
+            toastr.remove();
+            let node = $("[id=tblCompanyStructure]").treegrid("getSelected");
+            if (node === undefined || node === null) {
+                toastr.warning(VNMessageR.COMMON_00016);
+                return false;
+            }
+            try {
+                $.ajax({
+                    type: "GET",
+                    url: "/CompanyStructure/GetById?id=" + node.id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            setFormData(msg.Data);
+                            let parentLevelId = objCombo.cboLevelCompanyStructureData.length > 0
+                                ? objCombo.cboLevelCompanyStructureData.find(x => x.Id == msg.Data.LevelCompanyStructureKey)?.ParentId
+                                : null;
+                            intitCombotreeDataDepartmentLevel(objCombo.cboLevelCompanyStructureData, parentLevelId, msg.Data.LevelCompanyStructureKey);
+
+                        } else {
+                            toastr.error(VNMessageR.COMMON_00015);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err); ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            CompanyStructureKey: $("[id=txtCompanyStructureKey]").val() || null,
+                            CompanyStructureCode: $("[id=txtCompanyStructureCode]").val(),
+                            CompanyStructureName: $("[id=txtCompanyStructureName]").val(),
+                            CompanyStructureParent: $('[id$=cboCompanyStructureParent').combotree('getValue'),
+                            Description: $("[id=txtDescription]").val(),
+                            Active: $("[id=cbActive]").prop("checked"),
+                            LevelCompanyStructureKey: $('[id$=cboLevelCompanyStructure').combotree('getValue')
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            CompanyStructureKey: $("[id=txtCompanyStructureKey]").val(),
+                            CompanyStructureCode: $("[id=txtCompanyStructureCode]").val(),
+                            CompanyStructureName: $("[id=txtCompanyStructureName]").val(),
+                            CompanyStructureParent: $('[id$=cboCompanyStructureParent').combotree('getValue'),
+                            Description: $("[id=txtDescription]").val(),
+                            Active: $("[id=cbActive]").prop("checked"),
+                            LevelCompanyStructureKey: $('[id$=cboLevelCompanyStructure').combotree('getValue'),
+                        };
+                        CallAjaxSave("Update", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function resetFormData() {
+            $("[id=divCreate]").css("display", "");
+            $("[id=divUpdate]").css("display", "none");
+            $("[id=btnUpdate]").prop("disabled", false);
+            $("[id=txtCompanyStructureCode]").prop("readonly", false);
+            $("[id=compModal]").find("input[type=text],input[type=number], textarea").val("");
+            $("[id=compModal]").find("input[type=checkbox]").prop("checked", true);
+            $('[id$=cboCompanyStructureParent').combotree('setValue', null);
+        };
+
+        function setFormData(data) {
+            $("[id=divCreate]").css("display", "none");
+            $("[id=divUpdate]").css("display", "");
+            //$("[id=txtCompanyStructureCode]").prop("readonly", false);
+            $('[id$=txtCompanyStructureKey]').val(data.CompanyStructureKey);
+            $('[id$=txtCompanyStructureCode]').val(data.CompanyStructureCode);
+            $('[id$=txtCompanyStructureName]').val(data.CompanyStructureName);
+            $('[id$=txtDescription]').val(data.Description);
+            $("[id$=cbActive]").prop('checked', data.Active);
+            $("[id$=cboCompanyStructureParent]").combotree({
+                onLoadSuccess: function () {
+                    $('[id$=cboCompanyStructureParent').combotree('setValue', data.CompanyStructureParent);
+                }
+            });
+            //$("[id$=cboLevelCompanyStructure]").combotree({
+            //    onLoadSuccess: function () {
+            //        $('[id$=cboLevelCompanyStructure').combotree('setValue', data.LevelCompanyStructureKey);
+            //    }
+            //});
+            if(data.CompanyStructureCode === "TCT"){
+                $("[id=btnUpdate]").prop("disabled", true);
+            }
+        };
+
+        function onDelete(e) {
+            e.preventDefault();
+            let node = $("[id=tblCompanyStructure]").treegrid("getSelected");
+            if (node === undefined || node === null) {
+                toastr.warning(VNMessageR.COMMON_00016);
+                return false;
+            }
+            if (node.id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(node.id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/CompanyStructure/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    $('#compModal').modal('hide');
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    $('#compModal').modal('hide');
+                                    break;
+                            };
+
+                            setTimeout(function () {
+                                initCombo();
+                                onSearchDepartment();
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDelete(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/CompanyStructure/Delete/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            setTimeout(function () {
+                                initCombo();
+                                onSearchDepartment();
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        //open modal
+        function openCreateNew() {
+            resetFormData();
+            $('#compModal').modal('show');
+        }
+
+
+    </script>
+}

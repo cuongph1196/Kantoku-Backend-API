@@ -1,0 +1,13 @@
+﻿@using System.Globalization
+@model QLKTX.Models.FunctionMenuViewModel;
+
+
+@if (Model != null && Model.ModuleMenus != null && Model.ModuleMenus.Count() > 0)
+{
+    @foreach (var func in Model.ModuleMenus)
+    {
+        <li class="nav-item d-none d-sm-inline-block">
+            <a href=@func.Url class="nav-link">@func.ModuleName</a>
+        </li>
+    }
+}

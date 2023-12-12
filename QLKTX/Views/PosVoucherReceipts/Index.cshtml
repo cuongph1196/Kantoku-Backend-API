@@ -1,0 +1,245 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Phiếu thu từ máy POS";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label class="red">Từ ngày (*)</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtDateFrom" type="text" class="form-control form-control-sm date-picker" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label class="red">Đến ngày (*)</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtDateTo" type="text" class="form-control form-control-sm date-picker" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" onclick="javascript: onCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS Phiếu thu từ máy POS</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblVoucher" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên chứng từ</th>
+                                <th>Ngày chứng từ</th>
+                                <th>Số chứng từ</th>
+                                <th>Dự án</th>
+                                <th>Mặt bằng/Ki-ốt</th>
+                                <th>Khách hàng</th>
+                                <th>Trạng thái</th>
+                                @*<th></th>*@
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+        var TransID = "@Model.TransID";
+        var searchModel = {
+            DateFrom: null,
+            DateTo: null,
+            SearchParams: null
+        };
+        var objCombo = {
+            cboBuildingData: [],
+            cboDepartmentData: [],
+            cboPartnerData: [],
+            cboReasonData: []
+        };
+        var objDataEntry = {
+            objVoucher: {},
+            arrVDetails: []
+        };
+        $(document).ready(async function () {
+            var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+            var lastDay = moment().endOf('month').format('DD/MM/YYYY');
+            $('#txtDateFrom').val(firstDay);
+            $('#txtDateTo').val(lastDay);
+            $.ajaxSettings.async = false;
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+
+        });
+
+        function onSearchPaging() {
+            searchModel.DateFrom = moment($("[id$=txtDateFrom]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.DateTo = moment($("[id$=txtDateTo]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.SearchParams = $("[id=txtSearch]").val().trim();
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblVoucher").DataTable().destroy();
+            $("#tblVoucher tbody").empty(); // empty tbody
+            $("#tblVoucher").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/PosVoucherReceipts/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.SearchParams = searchModel.SearchParams;
+                        dataSearch.DateFrom = searchModel.DateFrom;
+                        dataSearch.DateTo = searchModel.DateTo;
+                        dataSearch.FunctionID = FunctionID;
+                        dataSearch.TransID = TransID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "TransName", "sortable": false },
+                    { "data": "TransDate", "className": "text-center", "sortable": true },
+                    {
+                        "data": "TransNo", "className": "text-center",
+                        "sortable": false,
+                        "render": function (data, type, full, meta) {
+                            return '<span title="Xem chi tiết" onclick="openEdit(\'' +
+                                full.Rowkey + '\',\'' +
+                                full.TransDate +
+                                '\')" class="tooltip-success" style="cursor: pointer;">' +
+                                '<i class="red2 bigger-110" style="color: #3f668d!important;">' + data + '</i></span>&nbsp;';
+                        }
+                    },
+                    { "data": "BuildingName", "width": 100, "sortable": false },
+                    { "data": "DepartmentName", "width": 100, "sortable": false },
+                    { "data": "PartnerName", "width": 100, "sortable": false },
+                    {
+                        "data": "StatusName", "sortable": false,
+                        "className": "text-center",
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            return full.Status
+                                ? `<span class="label label-sm label-info-bt arrowed arrowed-righ">${data}</span>`
+                                : `<span class="label label-sm label-danger arrowed arrowed-righ">${data}</span>`;
+                        }
+                    }
+                    //{
+                    //    "className": "text-center project-actions text-right",
+                    //    "sortable": false,
+                    //    "width": 200,
+                    //    "render": function (data, type, full, meta) {
+                    //        var actionStr = "";
+                    //        if (full.ContractDeclareKey) {
+                    //            actionStr = `<button class="btn btn-info btn-xs" onclick = "openEdit(event, '${full.ContractDeclareKey}')"> <i class="fas fa-pencil-alt"> </i> Sửa </button>&nbsp;`;
+                    //            actionStr += `<button class="btn btn-danger btn-xs" onclick = "onDelete(event, '${full.ContractDeclareKey}')"> <i class="fas fa-trash"> </i> Xóa </button>&nbsp;`;
+                    //            actionStr += `<a type="button" class="btn btn-success btn-xs" method="get" href="/PosVoucherReceipts/SampleContract?ModuleID=${@Model.ModuleID}&FunctionID=${@Model.FunctionID}&ContractDeclareKey=${full.ContractDeclareKey}"><i class="fas fa-eye"></i> HĐ mẫu</a>&nbsp;`;
+                    //        }
+                    //        return actionStr;
+                    //    }
+                    //}
+                ],
+                "aaSorting": [[2, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        //open modal
+        function onCreateNew(e) {
+            OpenUrlDetail(36, 0, true);
+        }
+
+        function openEdit(id, transDate) {
+            OpenUrlDetail(36, id, transDate, false);
+        }
+
+    </script>
+}

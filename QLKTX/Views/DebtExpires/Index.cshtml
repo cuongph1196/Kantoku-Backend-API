@@ -1,0 +1,267 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Cảnh báo chậm thanh toán";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Từ ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateFrom" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Đến ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateTo" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Dự án</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuilding" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Khu vực</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuildingSection" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Tình trạng</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchStatus" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS Hợp đồng</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblDebtExpires" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số HĐ</th>
+                                <th>Tên HĐ</th>
+                                <th>Hết hạn HĐ</th>
+                                <th>Ngày dự kiến thanh toán</th>
+                                <th>Lý do thu</th>
+                                <th>Số tiền</th>
+                                <th>Trạng thái</th>
+                                <th>Ngày phiếu thu</th>
+                                <th>Số phiếu thu</th>
+                                <th>Số ngày chậm trả</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+
+        var searchModel = {
+            DateFrom: null,
+            DateTo: null,
+            BuildingKey: null,
+            BuildingSectionKey: null,
+            Status: null,
+            FunctionID: FunctionID
+        };
+
+        var objCombo = {
+            cboBuildingData: [],
+            cboBuildingSectionData: [],
+            cboStatusData: [
+                {
+                    Id: "0",
+                    NameCompare: "Chưa thanh toán"
+                }, {
+                    Id: "1",
+                    NameCompare: "Đã thanh toán"
+                }, {
+                    Id: "",
+                    NameCompare: "Tất cả"
+                },
+            ]
+        };
+
+        $(document).ready(async function () {
+            var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+            var lastDay = moment().endOf('month').format('DD/MM/YYYY');
+            $('#txtSearchDateFrom').val(firstDay);
+            $('#txtSearchDateTo').val(lastDay);
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', false, 300);
+            initComboBox(objCombo.cboStatusData, 'cboSearchStatus', false, 300, false, "0");
+            $("[id=cboSearchBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboSearchBuildingSection', false, 300);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboSearchBuildingSection', false, 300);
+                }
+            });
+            //oload
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function onSearchPaging() {
+            searchModel.DateFrom = moment($("[id$=txtSearchDateFrom]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.DateTo = moment($("[id$=txtSearchDateTo]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.BuildingKey = $("[id=cboSearchBuilding]").combobox("getValue");
+            searchModel.BuildingSectionKey = $("[id=cboSearchBuildingSection]").combobox("getValue");
+            let statusKey = $("#cboSearchStatus").combobox("getValue");
+            searchModel.Status = statusKey != "" ? parseInt(statusKey) : null;
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblDebtExpires").DataTable().destroy();
+            $("#tblDebtExpires tbody").empty(); // empty tbody
+            $("#tblDebtExpires").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/DebtExpires/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.DateFrom = searchModel.DateFrom;
+                        dataSearch.DateTo = searchModel.DateTo;
+                        dataSearch.BuildingKey = searchModel.BuildingKey;
+                        dataSearch.BuildingSectionKey = searchModel.BuildingSectionKey;
+                        dataSearch.Status = searchModel.Status;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "createdRow": function (row, data, dataIndex) {
+                    var dateDiff = moment(data.TransDate, "DD/MM/YYYY").diff(moment(), 'days');
+                    if (dateDiff > 0 && dateDiff < 10) {
+                        $(row).css({ "background-color": "#feffc2" });
+                    }
+                    else if (moment(data.TransDate, "DD/MM/YYYY") <= moment()) {
+                        $(row).css({ "background-color": "#fda4a4" });
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 20,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "ContractCode", "width": 100, "sortable": false },
+                    { "data": "ContractName", "width": 200, "sortable": false },
+                    { "data": "DateExpires", "className": "text-center", "sortable": false, "width": 100 },
+                    { "data": "AnticipatePaymentDate", "className": "text-center", "sortable": false, "width": 100 },
+                    { "data": "ReasonName", "width": 200, "sortable": false },
+                    { "data": "Amount", "width": 100, "className": "text-right", "sortable": false },
+                    { "data": "StatusName", "width": 100, "className": "text-center", "sortable": false },
+                    { "data": "TransDate", "width": 100, "className": "text-center", "sortable": false },
+                    { "data": "TransNo", "width": 100, "className": "text-center", "sortable": false },
+                    { "data": "DaysLatePayment", "width": 100, "className": "text-right", "sortable": false }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        //open modal
+        function openEdit(id, transDate) {
+            OpenUrlDetail(26, id, transDate, false);
+        }
+
+    </script>
+}

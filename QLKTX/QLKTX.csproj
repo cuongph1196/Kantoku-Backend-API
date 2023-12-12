@@ -1,0 +1,138 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <!--<Nullable>enable</Nullable>-->
+    <ImplicitUsings>enable</ImplicitUsings>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <!--<EnablePreviewFeatures>true</EnablePreviewFeatures>-->
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\Reports\rpt_StatisticsOfReceiptsReport.rdlc" />
+    <Content Remove="wwwroot\Reports\rpt_SummaryVoucherReport.rdlc" />
+    <Content Remove="wwwroot\Reports\rpt_VoucherDetailReport.rdlc" />
+    <Content Remove="wwwroot\Reports\rpt_VoucherDReasonReport.rdlc" />
+    <Content Remove="wwwroot\rpt_StatisticsOfPaymentsReport.rdlc" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Dataset\ds_StatisticsOfPayments.xsc" />
+    <None Remove="Dataset\ds_StatisticsOfPayments.xss" />
+    <None Remove="Dataset\ds_StatisticsOfReceipts.xsc" />
+    <None Remove="Dataset\ds_StatisticsOfReceipts.xss" />
+    <None Remove="Dataset\ds_SummaryVoucher - Copy.xsc" />
+    <None Remove="Dataset\ds_SummaryVoucher - Copy.xss" />
+    <None Remove="Dataset\ds_SummaryVoucherReport.xsc" />
+    <None Remove="Dataset\ds_SummaryVoucherReport.xss" />
+    <None Remove="Dataset\ds_VoucherDetail - Copy.xsc" />
+    <None Remove="Dataset\ds_VoucherDetail - Copy.xss" />
+    <None Remove="Dataset\ds_VoucherDetail.xsc" />
+    <None Remove="Dataset\ds_VoucherDetail.xss" />
+    <None Remove="Dataset\ds_VoucherDReasonReport.xsc" />
+    <None Remove="Dataset\ds_VoucherDReasonReport.xss" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Dataset\ds_StatisticsOfPayments.xsc" />
+    <Content Include="Dataset\ds_StatisticsOfPayments.xss" />
+    <Content Include="Dataset\ds_StatisticsOfReceipts.xsc" />
+    <Content Include="Dataset\ds_StatisticsOfReceipts.xss" />
+    <Content Include="Dataset\ds_SummaryVoucher.xsc" />
+    <Content Include="Dataset\ds_SummaryVoucher.xss" />
+    <Content Include="Dataset\ds_VoucherDetail.xsc" />
+    <Content Include="Dataset\ds_VoucherDetail.xss" />
+    <Content Include="Dataset\ds_VoucherDReasonReport.xsc" />
+    <Content Include="Dataset\ds_VoucherDReasonReport.xss" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="wwwroot\Reports\rpt_StatisticsOfReceiptsReport.rdlc" />
+    <EmbeddedResource Include="wwwroot\Reports\rpt_SummaryVoucherReport.rdlc" />
+    <EmbeddedResource Include="wwwroot\Reports\rpt_VoucherDetailReport.rdlc" />
+    <EmbeddedResource Include="wwwroot\Reports\rpt_VoucherDReasonReport.rdlc" />
+    <EmbeddedResource Include="wwwroot\Reports\rpt_StatisticsOfPaymentsReport.rdlc" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="QLKTX.sln" />
+    <None Include="wwwroot\Reports\rpt_SummaryVoucherReport.rdlc" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <PackageReference Include="AspNetCore.Reporting" Version="2.1.0" />
+    <PackageReference Include="BCrypt.Net-Next" Version="4.0.3" />
+    <PackageReference Include="BoldReports.Net.Core" Version="5.3.11" />
+    <PackageReference Include="Dapper" Version="2.0.151" />
+    <PackageReference Include="EPPlus" Version="7.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="6.0.25" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.25" />
+    <PackageReference Include="Serilog.AspNetCore" Version="6.1.0" />
+    <PackageReference Include="System.CodeDom" Version="6.0.0" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.5" />
+    <PackageReference Include="System.Net.Http" Version="4.3.4" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Folder Include="wwwroot\assets\Upload\Files\" />
+    <Folder Include="wwwroot\assets\Upload\Images\" />
+    <Folder Include="wwwroot\Upload\" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <Compile Update="Dataset\ds_StatisticsOfPayments.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ds_StatisticsOfPayments.xsd</DependentUpon>
+    </Compile>
+    <Compile Update="Dataset\ds_StatisticsOfReceipts.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ds_StatisticsOfReceipts.xsd</DependentUpon>
+    </Compile>
+    <Compile Update="Dataset\ds_SummaryVoucher.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ds_SummaryVoucher.xsd</DependentUpon>
+    </Compile>
+    <Compile Update="Dataset\ds_VoucherDetail.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ds_VoucherDetail.xsd</DependentUpon>
+    </Compile>
+    <Compile Update="Dataset\ds_VoucherDReasonReport.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>ds_VoucherDReasonReport.xsd</DependentUpon>
+    </Compile>
+  </ItemGroup>
+  
+  <ItemGroup>
+    <None Update="Dataset\ds_StatisticsOfPayments.xsd">
+      <SubType>Designer</SubType>
+      <LastGenOutput>ds_StatisticsOfPayments.Designer.cs</LastGenOutput>
+      <Generator>MSDataSetGenerator</Generator>
+    </None>
+    <None Update="Dataset\ds_StatisticsOfReceipts.xsd">
+      <SubType>Designer</SubType>
+      <LastGenOutput>ds_StatisticsOfReceipts.Designer.cs</LastGenOutput>
+      <Generator>MSDataSetGenerator</Generator>
+    </None>
+    <None Update="Dataset\ds_SummaryVoucher.xsd">
+      <SubType>Designer</SubType>
+      <LastGenOutput>ds_SummaryVoucher.Designer.cs</LastGenOutput>
+      <Generator>MSDataSetGenerator</Generator>
+    </None>
+    <None Update="Dataset\ds_VoucherDetail.xsd">
+      <SubType>Designer</SubType>
+      <LastGenOutput>ds_VoucherDetail.Designer.cs</LastGenOutput>
+      <Generator>MSDataSetGenerator</Generator>
+    </None>
+    <None Update="Dataset\ds_VoucherDReasonReport.xsd">
+      <SubType>Designer</SubType>
+      <LastGenOutput>ds_VoucherDReasonReport.Designer.cs</LastGenOutput>
+      <Generator>MSDataSetGenerator</Generator>
+    </None>
+  </ItemGroup>
+  
+</Project>

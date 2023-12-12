@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ds_SummaryVoucherReport" targetNamespace="http://tempuri.org/ds_SummaryVoucherReport.xsd" xmlns:mstns="http://tempuri.org/ds_SummaryVoucherReport.xsd" xmlns="http://tempuri.org/ds_SummaryVoucherReport.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="ds_SummaryVoucherReport" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:EnableTableAdapterManager="true" msprop:Generator_UserDSName="ds_SummaryVoucherReport" msprop:Generator_DataSetName="ds_SummaryVoucherReport">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="ds_SummaryVoucher" msprop:Generator_RowEvHandlerName="ds_SummaryVoucherRowChangeEventHandler" msprop:Generator_RowDeletedName="ds_SummaryVoucherRowDeleted" msprop:Generator_RowDeletingName="ds_SummaryVoucherRowDeleting" msprop:Generator_RowEvArgName="ds_SummaryVoucherRowChangeEvent" msprop:Generator_TablePropName="ds_SummaryVoucher" msprop:Generator_RowChangedName="ds_SummaryVoucherRowChanged" msprop:Generator_RowChangingName="ds_SummaryVoucherRowChanging" msprop:Generator_TableClassName="ds_SummaryVoucherDataTable" msprop:Generator_RowClassName="ds_SummaryVoucherRow" msprop:Generator_TableVarName="tableds_SummaryVoucher" msprop:Generator_UserTableName="ds_SummaryVoucher">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="BuildingCode" msprop:Generator_ColumnPropNameInRow="BuildingCode" msprop:Generator_ColumnPropNameInTable="BuildingCodeColumn" msprop:Generator_ColumnVarNameInTable="columnBuildingCode" msprop:Generator_UserColumnName="BuildingCode" type="xs:string" minOccurs="0" />
+              <xs:element name="BuildingName" msprop:Generator_ColumnPropNameInRow="BuildingName" msprop:Generator_ColumnPropNameInTable="BuildingNameColumn" msprop:Generator_ColumnVarNameInTable="columnBuildingName" msprop:Generator_UserColumnName="BuildingName" type="xs:string" minOccurs="0" />
+              <xs:element name="BeginAmount" msprop:Generator_ColumnPropNameInRow="BeginAmount" msprop:Generator_ColumnPropNameInTable="BeginAmountColumn" msprop:Generator_ColumnVarNameInTable="columnBeginAmount" msprop:Generator_UserColumnName="BeginAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="InAmount" msprop:Generator_ColumnPropNameInRow="InAmount" msprop:Generator_ColumnPropNameInTable="InAmountColumn" msprop:Generator_ColumnVarNameInTable="columnInAmount" msprop:Generator_UserColumnName="InAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="OutAmount" msprop:Generator_ColumnPropNameInRow="OutAmount" msprop:Generator_ColumnPropNameInTable="OutAmountColumn" msprop:Generator_ColumnVarNameInTable="columnOutAmount" msprop:Generator_UserColumnName="OutAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="RemainAmount" msprop:Generator_ColumnPropNameInRow="RemainAmount" msprop:Generator_ColumnPropNameInTable="RemainAmountColumn" msprop:Generator_ColumnVarNameInTable="columnRemainAmount" msprop:Generator_UserColumnName="RemainAmount" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

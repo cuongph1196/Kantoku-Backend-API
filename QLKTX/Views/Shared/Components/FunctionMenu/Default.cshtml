@@ -1,0 +1,21 @@
+﻿@using System.Globalization
+@model QLKTX.Models.FunctionMenuViewModel;
+
+<ul id="funcMenu" class="nav nav-pills nav-sidebar flex-column" data-widget="treeview" role="menu" data-accordion="false">
+    <!-- Add icons to the links using the .nav-icon class
+         with font-awesome or any other icon font library -->
+    @if (Model != null && Model.FunctionMenus != null && Model.FunctionMenus.Count() > 0)
+    {
+        @foreach (var func in Model.FunctionMenus)
+        {
+            <li class="nav-item">
+                <a id="@func.FunctionID" href="@func.Url" class="@(func.FunctionID == Model.FunctionID ? "nav-link active" : "nav-link")">
+                    <i class="@func.Icons"></i>
+                    <p>
+                        @func.FunctionName
+                    </p>
+                </a>
+            </li>
+        }
+    }
+</ul>

@@ -1,0 +1,195 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PrintVoucherViewModel;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html ng-app="accnd">
+<head>
+    <meta charset="utf-8">
+    <title>Invoice</title><!-- jQuery -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <script src="~/lib/angularjs/angular.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- jquery-easyui -->
+    <script type="text/javascript" src="~/assets/easy-ui/jquery-easyui/jquery.easyui.min.js"></script>
+    <!-- Toastr -->
+    <script src="~/plugins/toastr/toastr.min.js"></script>
+    <script src="~/js/commonEM.js" asp-append-version="true"></script>
+    <script src="~/js/accounting.js"></script>
+    <link href="~/css/print/print_voucher.css" rel="stylesheet" asp-append-version="true" />
+    @*<script src="~/js/print/print_voucher.js" asp-append-version="true"></script>*@
+    <script type="text/javascript">
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            setTimeout(function () { window.print(); }, 500);
+            window.onafterprint = function () { setTimeout(function () { window.close(); }, 500); }
+            $.ajaxSettings.async = true;
+        });
+    </script>
+</head>
+<body ng-controller="printVoucherCtrl" style="padding:3%" data-ng-init="onPrintInit()">
+    <div style="width:21cm; height: 29.7cm; position:relative" ng-show="loading">
+        <div style="position:relative">
+            <div contenteditable style="position: absolute; left: 24px; text-align: left; top: 20px; line-height: 22px; font-weight:bold">
+                <p><b>@Model.PrintV.BuildingTaxName.ToUpper()</b></p>
+                <p>Mã số thuế: @Model.PrintV.BuildingTaxNumber</p>
+                <p>Địa chỉ: @Model.PrintV.BuildingTaxAddress</p>
+            </div>
+        </div>
+        <br />
+        <div style="position:relative; padding-top:10px;" class="p_thuchi">
+            <div style="display:inline-block; width:96%; text-align:center; margin-bottom:30px;">
+                <h1 style="font-size:32px; font-weight:bold;letter-spacing:normal; margin-top:70px;">@Model.PrintV.TransName</h1>
+                @*<p>Ngày {{voucherday}} tháng {{vouchermonth}} năm {{voucheryear}}</p>*@
+            </div>
+            <div style="width: 150px; position: absolute; right: 30px; top: 71px; font-size: 13px; line-height:18px">
+                <p style="width: 86%; display: inline-block; border-bottom: 1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position: relative; padding-left: 10%;height: 13px;">
+                    <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Số phiếu: @Model.PrintV.TransNo</b>
+                </p>
+            </div>
+            <br />
+            <p style="width: 86%; display: inline-block; border-bottom: 1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position: relative; padding-left: 10%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Họ và tên:</b><span>@Model.PrintV.PartnerName</span>
+            </p>
+            <p style="width:88%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative;  padding-left:8%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Địa chỉ:</b><span>@Model.PrintV.PartnerTaxAddress</span>
+            </p>
+            <p style="width:89%; line-height: 23px; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 4px; position:relative; padding-left:8%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Lý do nộp: </b><span>@Model.PrintV.Description</span>
+            </p>
+            <p style="width:96%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative;">&nbsp;</p>
+            <p style="width:88%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative; padding-left:8%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;">Số tiền: </b><span>@Model.PrintV.Amount</span>
+            </p>
+            <p style="width:81%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative; padding-left:15%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;">Viết bằng chữ:</b><span>@Model.PrintV.AmountText</span>
+            </p>
+            <p style="width:96%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative">&nbsp;</p>
+            <p style="width:86%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative; padding-left:10%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;">Kèm theo: </b><span contenteditable></span>
+                <b style="position: absolute; right: 200px; background: #fff; height: 20px; top: 3px;">chứng từ kế toán:</b>
+            </p>
+            <div style="width: 230px; position: absolute; right: 30px; font-size: 13px; line-height:18px">
+                @*<p style="width: 86%; display: inline-block; border-bottom: 1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position: relative; padding-left: 10%;height: 13px;">*@
+                <p>Hà Nôi,ngày........tháng........năm........</p>
+                @*</p>*@
+            </div>
+        </div>
+        <div style="margin-top:30px; display:inline-block; width:100%;">
+            <ul style="margin:0">
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Thủ trưởng đơn vị</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Kế toán trưởng</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px; font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Thủ quỹ</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Người lập phiếu</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Người nộp tiền</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+            </ul>
+        </div>
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <br />
+        <p style="width:100%; display:inline-block; border-bottom:1px dashed #000; padding: 0px 0px; margin-bottom: 10px; position:relative; left:0px;">&nbsp;</p>
+        <br />
+        <div style="position:relative">
+            <div contenteditable style="position: absolute; left: 24px; text-align: left; top: 20px; line-height: 22px; font-weight:bold">
+                <p><b>@Model.PrintV.BuildingTaxName.ToUpper()</b></p>
+                <p>Mã số thuế: @Model.PrintV.BuildingTaxNumber</p>
+                <p>Địa chỉ: @Model.PrintV.BuildingTaxAddress</p>
+            </div>
+        </div>
+        <br />
+        <div style="position:relative; padding-top:10px;" class="p_thuchi">
+            <div style="display:inline-block; width:96%; text-align:center; margin-bottom:30px;">
+                <h1 style="font-size:32px; font-weight:bold;letter-spacing:normal; margin-top:70px;">@Model.PrintV.TransName</h1>
+                @*<p>Ngày {{voucherday}} tháng {{vouchermonth}} năm {{voucheryear}}</p>*@
+            </div>
+            <div style="width: 150px; position: absolute; right: 30px; top: 71px; font-size: 13px; line-height:18px">
+                <p style="width: 86%; display: inline-block; border-bottom: 1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position: relative; padding-left: 10%;height: 13px;">
+                    <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Số phiếu: @Model.PrintV.TransNo</b>
+                </p>
+            </div>
+            <br />
+            <p style="width: 86%; display: inline-block; border-bottom: 1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position: relative; padding-left: 10%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Họ và tên:</b><span>@Model.PrintV.PartnerName</span>
+            </p>
+            <p style="width:88%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative;  padding-left:8%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Địa chỉ:</b><span>@Model.PrintV.PartnerTaxAddress</span>
+            </p>
+            <p style="width:89%; line-height: 23px; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 4px; position:relative; padding-left:8%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;" contenteditable>Lý do nộp: </b><span>@Model.PrintV.Description</span>
+            </p>
+            <p style="width:96%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative;">&nbsp;</p>
+            <p style="width:88%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative; padding-left:8%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;">Số tiền: </b><span>@Model.PrintV.Amount</span>
+            </p>
+            <p style="width:81%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative; padding-left:15%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;">Viết bằng chữ:</b><span>@Model.PrintV.AmountText</span>
+            </p>
+            <p style="width:96%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative">&nbsp;</p>
+            <p style="width:86%; display:inline-block; border-bottom:1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position:relative; padding-left:10%;height: 13px;">
+                <b style="position:absolute; left:0; background:#fff; height:20px;">Kèm theo: </b><span contenteditable></span>
+                <b style="position: absolute; right: 200px; background: #fff; height: 20px; top: 3px;">chứng từ kế toán:</b>
+            </p>
+            <div style="width: 230px; position: absolute; right: 30px; font-size: 13px; line-height:18px">
+                @*<p style="width: 86%; display: inline-block; border-bottom: 1px dashed #000; padding: 1px 0px; margin-bottom: 10px; position: relative; padding-left: 10%;height: 13px;">*@
+                <p>Hà Nôi,ngày........tháng........năm........</p>
+                @*</p>*@
+            </div>
+        </div>
+        <div style="margin-top:30px; display:inline-block; width:100%;">
+            <ul style="margin:0">
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Thủ trưởng đơn vị</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Kế toán trưởng</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px; font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Thủ quỹ</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Người lập phiếu</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+                <li style="float:left; width:20%; text-align:center">
+                    <b style="font-weight:bold" contenteditable>Người nộp tiền</b>
+                    <p style="padding:10px 0;">(Ký, ghi rõ họ tên)</p>
+                    <span contenteditable style="margin-top: 90px;  font-style:italic; font-weight:bold;"></span>
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

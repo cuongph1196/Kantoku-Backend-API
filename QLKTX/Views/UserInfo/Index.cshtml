@@ -1,0 +1,221 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_LayoutEntry.cshtml";
+    ViewData["Title"] = "Thông tin người dùng";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @*<div class="col-md-12">*@
+        <div class="col-6">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Thông tin</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Mã người dùng</label>
+                                <input type="text" id="txtUserID" class="form-control form-control-sm" autocomplete="off" readonly />
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Tên người dùng</label>
+                                <input type="text" id="txtUserName" class="form-control form-control-sm name_required" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Cơ cấu tổ chức</label>
+                                <input type="text" id="txtCompanyStructureName" class="form-control form-control-sm" autocomplete="off" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onChangeName(event)"><i class="fa fa-save"></i> Đổi tên</button>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Đổi mật khẩu</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Mật khẩu cũ</label>
+                                <input type="password" id="txtPasswordOld" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Mật khẩu mới</label>
+                                <input type="password" id="txtPassword" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Xác nhận mật khẩu mới</label>
+                                <input type="password" id="txtPasswordConfirm" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer clearfix text-center">
+                    <button type="button" id="btnChangePass" class="btn btn-sm btn-primary" onclick="onChangePass(event)"><i class="fas fa-key"></i> Đổi mật khẩu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @*</div>*@
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var namerequiredList = document.getElementsByClassName("name_required");
+        var requiredList = document.getElementsByClassName("entry_required");
+        var AccountLogin = "@Model.AccountLogin";
+        var lstUserAccount = [];
+        var userSearchModel = {
+            SearchParams: null
+        };
+        var objCombo = {
+            cboUserGroupData: [],
+            cboCompanyStructureData: [],
+        };
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            onGetByUser();
+            $.ajaxSettings.async = true;
+        });
+
+        function onGetByUser() {
+            ajaxindicatorstart(VNMessageR.COMMON_00011);
+            $.ajax({
+                type: 'GET',
+                url: "/UserInfo/GetById",
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                success: function (result) {
+                    if (result.Success) {
+                        setFormData(result.Data);
+                    }
+                    ajaxindicatorstop();
+                }, error: function (err) {
+                    ToastrException(err);
+                    ajaxindicatorstop();
+                }
+            });
+        }
+
+        function setFormData(data) {
+            $('[id$=txtUserID]').val(data.UserID);
+            $('[id$=txtUserName]').val(data.UserName);
+            $('[id$=txtCompanyStructureName]').val(data.CompanyStructureName);
+        };
+
+        function onChangeName(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(namerequiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            UserID: $("[id=txtUserID]").val(),
+                            UserName: $("[id=txtUserName]").val()
+                        };
+                        CallAjaxSave("UpdateName", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onChangePass(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            let objSave = {
+                UserID: $("[id=txtUserID]").val(),
+                PasswordOld: $("[id=txtPasswordOld]").val(),
+                Password: $("[id=txtPassword]").val(),
+                PasswordConfirm: $("[id=txtPasswordConfirm]").val(),
+            };
+
+            if(objSave.Password !== objSave.PasswordConfirm){
+                toastr.warning("Mật khẩu xác nhận chưa khớp !!!");
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        CallAjaxSave("UpdatePass", objSave);
+                    }
+                });
+            return false;
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "PUT",
+                    url: "/UserInfo/" + mode,
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "UpdateName":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    setTimeout(function () {
+                                        ReloadUrlOnIframe();
+                                    }, 500);
+                                    break;
+                                case "UpdatePass":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    setTimeout(function () {
+                                        window.parent.location = "/Home/Logout";
+                                    }, 700);
+                                    break;
+                            };
+
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+    </script>
+}

@@ -1,0 +1,1775 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_LayoutEntry.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Hợp đồng";
+}
+
+<div class="container-fluid pt-2">
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Mã HĐ</label>
+                <input type="text" id="txtContractCode" class="form-control form-control-sm entry_required" autocomplete="off" />
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Tên HĐ</label>
+                <input type="text" id="txtContractName" class="form-control form-control-sm entry_required" autocomplete="off" />
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Dự án</label>
+                <div class="">
+                    <input type="text" id="cboBuilding" class="easyui-combobox entry_required" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Khu vực</label>
+                <div class="">
+                    <input type="text" id="cboBuildingSection" class="easyui-combobox entry_required" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Đối tác</label>
+                <div class="">
+                    <input type="text" id="cboPartner" class="easyui-combobox entry_required" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Ngành hàng</label>
+                <div class="">
+                    <input type="text" id="cboCategory" class="easyui-combobox entry_required" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">HĐ mẫu</label>
+                <div class="">
+                    <input type="text" id="cboContractDeclare" class="easyui-combobox entry_required" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label>Ngày hiệu lực</label>
+                <div class="input-group date">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                    </div>
+                    <input id="txtValidDate" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Mặt bằng/Ki-ốt</label>
+                <div class="">
+                    <input type="text" id="cboDepartment" name="cboDepartment" class="easyui-combobox entry_required" data-options="multiple:true" autocomplete="off" />
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="form-group">
+                <label for="inputName">Kỳ hạn HĐ (tháng)</label>
+                <input type="number" id="txtContractTermByMonth" class="form-control form-control-sm entry_required" autocomplete="off" min="0" />
+            </div>
+        </div>
+        <div class="col-sm-12">
+            <div class="form-group">
+                <label for="inputName">Mô tả</label>
+                <textarea id="txtDescription" class="form-control form-control-sm" rows="3" autocomplete="off"></textarea>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <table id="dgContractDeclare" class="easyui-datagrid table-data" title="DS chi tiết HĐ mẫu" style="height: 200px;"></table>
+    </div>
+    </br>
+    <div class="row">
+        <table id="dgContractDetail" class="easyui-datagrid table-data" title="DS chi tiết" style="height: 400px;"></table>
+    </div>
+    </br>
+    <div class="row" id="frmDocument">
+        <div class="col-4">
+            <div class="form-group">
+                <label for="txtFileUpload">Tải file lên</label>
+                <div class="input-group" style="height: 31px !important;">
+                    <div class="custom-file" style="height: 31px !important;">
+                        <input type="file" class="custom-file-input form-control-sm" id="txtFileUpload" multiple="multiple">
+                        <label class="custom-file-label form-control-sm" for="txtFileUpload" style="height: 31px !important;"></label>
+                    </div>
+
+                    <div class="input-group-append" style="height: 31px !important;">
+                        <button type="button" class="btn btn-sm btn-success" onclick="onUploadFile(event)"><i class="fas fa-upload"></i> Lưu ảnh</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12" id="divUploadDocuments">
+            @await Component.InvokeAsync("UploadDocuments")
+        </div>
+    </div>
+    <div class="d-flex justify-content-center align-items-center">
+        <div id="divCopyNew" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnCreateCopy" class="btn btn-success" onclick="onCopyContract(event)">Gia hạn HĐ</button>
+        </div>
+        <div id="divCreate" class="form-group mx-1">
+            <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+        </div>
+        <div id="divUpdate" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+        </div>
+        <div id="divDelete" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnDelete" class="btn btn-danger" onclick="onDeleteEntry(event)" @(Model.FUPermiss.FDel ? "" : "disabled")>Xóa</button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var ContractKey = parseInt(GetURLParameter('masterKey') ? GetURLParameter('masterKey') : 0);
+        var TempKey = parseInt(GetURLParameter('tempKey') ? GetURLParameter('tempKey') : 0);
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined, editIndexCTDL = undefined;
+        var FunctionID = "@Model.FunctionID";
+        var lstDetailDeclare = [];
+        var flagChangeDeclare = false;
+        var searchModel = {
+            SearchParams: null
+        };
+        var objCombo = {
+            cboContractDeclareData: [],
+            cboBuildingData: [],
+            cboBuildingSectionData: [],
+            cboCategoryData: [],
+            cboDepartmentData: [],
+            cboPartnerData: [],
+            cboReasonData: []
+        };
+        var objDataEntry = {
+            objContract: {},
+            arrCDetails: []
+        };
+        $(document).ready(async function () {
+            //init upload file
+            bsCustomFileInput.init();
+            $.ajaxSettings.async = false;
+            initCombo();
+            $.ajaxSettings.async = true;
+            if (ContractKey > 0) {
+                onGetByID(ContractKey);
+            }
+            else if (TempKey > 0) {
+                onGetByOther(TempKey);
+            }
+            else {
+                //reload datagrid
+                BindingDataToGrid([]);
+                BindingDataToGridCTDL([]);
+            }
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboBuilding', false, 300, true);
+            objCombo.cboReasonData = getDataComboTree(ProjectCF.configs.baseApi + "/Common/combotree/reason?typeId=PTHU&active=1");
+            objCombo.cboCategoryData = getDataCombobox(ProjectCF.configs.baseApi + "/Common/combobox/category?active=1");
+            initComboBox(objCombo.cboCategoryData, 'cboCategory', false, 300, true);
+            $("[id=cboBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboBuildingSection', false, 300, true);
+                    objCombo.cboPartnerData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/partner?buildKey=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboPartnerData, 'cboPartner', false, 300, true);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboBuildingSection', false, 300, true);
+                    initComboBox([], 'cboPartner', false, 300, true);
+                }
+            });
+
+            $("[id=cboBuildingSection]").combobox({
+                onSelect: function (record) {
+                    let buildKey = $("[id=cboBuilding]").combobox("getValue");
+                    let validDate = $("#txtValidDate").val() ? moment($("#txtValidDate").val()).format("YYYYMMDD"): "";
+                    objCombo.cboDepartmentData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/department-by-contract?buildKey=${buildKey}&buildSectionKey=${record.Id}&validDate=${validDate}&contractKey=${ContractKey}&active=1`);
+                    initComboBoxExists(objCombo.cboDepartmentData, 'cboDepartment', false, 300, true, [], true);
+                    let categoryKey = $("[id=cboCategory]").combobox("getValue");
+                    objCombo.cboContractDeclareData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/contract-declare?buildKey=${buildKey}&buildSectionKey=${record.Id}&categoryKey=${categoryKey}&active=1`);
+                    initComboBox(objCombo.cboContractDeclareData, 'cboContractDeclare', false, 300, true);
+                },
+                onUnselect: function (record) {
+                    initComboBoxExists([], 'cboDepartment', false, 300, true, [], true);
+                }
+            });
+
+            $("[id=cboCategory]").combobox({
+                onSelect: function (record) {
+                    let buildKey = $("[id=cboBuilding]").combobox("getValue");
+                    let buildSectionKey = $("[id=cboBuildingSection]").combobox("getValue");
+                    objCombo.cboContractDeclareData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/contract-declare?buildKey=${buildKey}&buildSectionKey=${buildSectionKey}&categoryKey=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboContractDeclareData, 'cboContractDeclare', false, 300, true);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboContractDeclare', false, 300, true);
+                }
+            });
+
+            $("[id=cboContractDeclare]").combobox({
+                onSelect: function (record) {
+                    //if (masterKey <= 0) {
+                    onGetContractDeclareByID(record.Id);
+                    //}
+                },
+                onUnselect: function (record) {
+                    resetFormDatabyDeclare();
+                }
+            });
+
+            $("#txtValidDate").on("change", function() {
+                let buildKey = $("[id=cboBuilding]").combobox("getValue");
+                let validDate = $("#txtValidDate").val() ? moment($("#txtValidDate").val(), "DD/MM/YYYY").format("YYYYMMDD"): "";
+                let buildingSKey = $("[id=cboBuildingSection]").combobox("getValue");
+                objCombo.cboDepartmentData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/department-by-contract?buildKey=${buildKey}&buildSectionKey=${buildingSKey}&validDate=${validDate}&contractKey=${ContractKey}&active=1`);
+                initComboBoxExists(objCombo.cboDepartmentData, 'cboDepartment', false, 300, true, [], true);
+            });
+
+            $("input[type='text'], input[type='number'], select, textarea").on( "change", function() {
+                flagChangeDeclare = true;
+            });
+            $("#cboPartner").combobox({
+                onChange: function(newVal, oldVal){
+                    if(oldVal !== "" && newVal !== oldVal)
+                    {
+                        flagChangeDeclare = true;
+                    }
+                }
+            })
+            $("#cboBuilding").combobox({
+                onChange: function(newVal, oldVal){
+                    if(oldVal !== "" && newVal !== oldVal)
+                    {
+                        flagChangeDeclare = true;
+                    }
+                }
+            })
+            $("#cboBuildingSection").combobox({
+                onChange: function(newVal, oldVal){
+                    if(oldVal !== "" && newVal !== oldVal)
+                        flagChangeDeclare = true;
+                }
+            })
+            $("#cboCategory").combobox({
+                onChange: function(newVal, oldVal){
+                    if(oldVal !== "" && newVal !== oldVal)
+                    {
+                        flagChangeDeclare = true;
+                    }
+                }
+            })
+            $("#cboContractDeclare").combobox({
+                onChange: function(newVal, oldVal){
+                    if(oldVal !== "" && newVal !== oldVal)
+                    {
+                        flagChangeDeclare = true;
+                    }
+                }
+            })
+            $("#cboDepartment").combobox({
+                onChange: function(newVal, oldVal){
+                    if(oldVal.length > 0 && newVal !== oldVal)
+                    {
+                        flagChangeDeclare = true;
+                    }
+                }
+            })
+
+            $.ajaxSettings.async = true;
+        }
+
+        //
+        function onGetByOther(contractKey) {
+            if (contractKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/Contract/GetById/" + contractKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.Success) {
+                            bindingDataToFormByOther(result.Data);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                BindingDataToGrid([]);
+            }
+        }
+        
+        function bindingDataToFormByOther(data) {
+            if (data == null) {
+                BindingDataToGrid([]);
+            }
+            else {
+                objDataEntry.objContract = data.Contract;
+                objDataEntry.arrCTemps = data.CTemps;
+                setFormDataOther(objDataEntry.objContract);
+                setTimeout(() => {
+                    BindingDataToGrid([]);
+                    if (objDataEntry.arrCTemps != null && objDataEntry.arrCTemps.length > 0)
+                        BindingDataToGridCTDL(objDataEntry.arrCTemps);
+                    else
+                        BindingDataToGridCTDL([]);
+
+                }, 600);
+            }
+        }
+        
+        function setFormDataOther(data) {
+            initButton(0);
+            data.ContractCode = "";
+            $("[id=txtContractCode]").prop("readonly", false);
+            //$("[id$=cbActive]").prop('checked', data.Active);
+            $("[id$=cboBuilding]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuilding').combobox('setValue', data.BuildingKey);
+                }
+            });
+            $("[id$=cboBuildingSection]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuildingSection').combobox('setValue', data.BuildingSectionKey);
+
+                }
+            });
+            $("[id$=cboPartner]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboPartner').combobox('setValue', data.PartnerKey);
+                }
+            });
+            $("[id$=cboDepartment]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboDepartment').combobox('setValues', data.DepartmentKey?.split(","));
+                }
+            }); 
+            $("[id$=cboCategory]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboCategory').combobox('setValue', data.CategoryKey);
+                }
+            });
+            $("[id$=cboContractDeclare]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboContractDeclare').combobox('setValue', data.ContractDeclareKey);
+                },
+                //readonly: true
+            });
+            setTimeout(function () {
+                $('[id$=txtContractCode]').val(data.ContractCode);
+                $('[id$=txtContractName]').val(data.ContractName);
+                $('[id$=txtContractTermByMonth]').val(data.ContractTermByMonth);
+                $('[id$=txtValidDate]').val(data.DateExpires);
+                $('[id$=txtDescription]').val(data.Description);
+                //objCombo.cboDepartmentData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/department-by-contract?buildKey=${data.BuildingKey}&buildSectionKey=${data.BuildingSectionKey}&validDate=${data.DateExpires}&contractKey=0&active=1`);
+                //$("[id$=cboDepartment]").combobox({
+                //    data: objCombo.cboDepartmentData,
+                //    onLoadSuccess: function () {
+                //        $('[id$=cboDepartment').combobox('setValues', data.DepartmentKey?.split(","));
+                //    }
+                //}); 
+            }, 300);
+        };
+
+        function onGetByID(contractKey) {
+            if (contractKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/Contract/GetById/" + contractKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.Success) {
+                            onGetDocumentByKey(contractKey);
+                            bindingDataToForm(result.Data);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                BindingDataToGrid([]);
+            }
+        }
+
+        function onGetDocumentByKey(contractKey) {
+            if (contractKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: `/Contract/GetDocumentsUpload?masterKey=${contractKey}`,
+                    headers: { 'FunctionID': FunctionID },
+                    success: function (result) {
+                        $("#divUploadDocuments").html("");
+                        $("#divUploadDocuments").html(result);
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                $("#divUploadDocuments").html("");
+            }
+        }
+
+        function onGetContractDeclareByID(contractDeclareKey) {
+            if (contractDeclareKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/ContractDeclare/GetById/" + contractDeclareKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.Success) {
+                            bindingDataToFormCTDL(result.Data);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                resetFormDatabyDeclare();
+                BindingDataToGridCTDL();
+            }
+        }
+
+        function GetDataCalculator() {
+            //let isValidForm = ValidateControlForm(requiredList);
+            //let isValidTemp = ValidateDatagridRows("dgContractDeclare");
+            //if (!isValidForm || !isValidTemp) {
+            //    toastr.warning(VNMessageR.COMMON_00001);
+            //    return false;
+            //}
+
+            let objData = {
+                Contract: getDataMaster(),
+                CTemps: getDataTemp()
+            };
+            ajaxindicatorstart(VNMessageR.COMMON_00011);
+            $.ajax({
+                type: 'POST',
+                url: "/Contract/GetDataCalculator",
+                headers: { 'FunctionID': FunctionID },
+                dataType: "json",
+                contentType: "application/json; charset=utf-8",
+                data: JSON.stringify(objData),
+                success: function (result) {
+                    if (result.Success) {
+                        flagChangeDeclare = false;
+                        BindingDataToGrid(result.Data.Items);
+                    }
+                    ajaxindicatorstop();
+                }, error: function (err) {
+                    ToastrException(err);
+                    ajaxindicatorstop();
+                }
+            });
+        }
+
+        function onUploadFile(e) {
+            var objParams = {
+                MasterKey: ContractKey,
+                File: $("#txtFileUpload")[0].files
+            }
+            if (ContractKey > 0 && objParams.File.length > 0) {
+                CallAjaxUploadDocs(objParams);
+            }
+        }
+
+        function bindingDataToForm(data) {
+            if (data == null) {
+                BindingDataToGrid([]);
+            }
+            else {
+                objDataEntry.objContract = data.Contract;
+                objDataEntry.arrCDetails = data.CDetails;
+                objDataEntry.arrCTemps = data.CTemps;
+                setFormData(objDataEntry.objContract);
+                setTimeout(() => {
+                    if (objDataEntry.arrCDetails != null && objDataEntry.arrCDetails.length > 0)
+                        BindingDataToGrid(objDataEntry.arrCDetails);
+                    else
+                        BindingDataToGrid([]);
+
+                    if (objDataEntry.arrCTemps != null && objDataEntry.arrCTemps.length > 0)
+                        BindingDataToGridCTDL(objDataEntry.arrCTemps);
+                    else
+                        BindingDataToGridCTDL([]);
+
+                }, 600);
+            }
+        }
+
+        function bindingDataToFormCTDL(data) {
+            if (data == null) {
+                BindingDataToGridCTDL([]);
+            }
+            else {
+                setFormDatabyDeclare(data.ContractDeclare);
+                lstDetailDeclare = data.CDDetails;
+                setTimeout(() => {
+                    if (lstDetailDeclare != null && lstDetailDeclare.length > 0)
+                        BindingDataToGridCTDL(lstDetailDeclare);
+                    else
+                        BindingDataToGridCTDL([]);
+                }, 500);
+            }
+        }
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidTemp = ValidateDatagridRows("dgContractDeclare");
+            let isValidDetail = ValidateDatagridRows("dgContractDetail");
+            let isValidCombo = ValidCombo();
+            if (!isValidForm || !isValidDetail || !isValidTemp || !isValidCombo) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            if (flagChangeDeclare) {
+                toastr.warning("Vui lòng tính chi tiết HĐ trước khi lưu !!!");
+            } else {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            Contract: getDataMaster(),
+                            CTemps: getDataTemp(),
+                            CDetails: getDataDetail()
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+                return false;
+            }
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidTemp = ValidateDatagridRows("dgContractDeclare");
+            let isValidDetail = ValidateDatagridRows("dgContractDetail");
+            let isValidCombo = ValidCombo();
+            if (!isValidForm || !isValidDetail || !isValidTemp || !isValidCombo) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            
+            if (flagChangeDeclare){
+                toastr.warning("Vui lòng tính chi tiết HĐ trước khi lưu !!!");
+            } else{
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00007,
+                    function (r) {
+                        if (r) {
+                            let objSave = {
+                                Contract: getDataMaster(),
+                                CTemps: getDataTemp(),
+                                CDetails: getDataDetail()
+                            };
+                            CallAjaxSave("Update", objSave);
+                        }
+                    });
+                return false;
+            }
+        }
+
+        function onApprove(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidTemp = ValidateDatagridRows("dgContractDeclare");
+            let isValidDetail = ValidateDatagridRows("dgContractDetail");
+            if (!isValidForm || !isValidDetail || !isValidTemp) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            CallAjaxApprove("PUT", "Approve", ContractKey);
+        }
+
+        function onReject(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidTemp = ValidateDatagridRows("dgContractDeclare");
+            let isValidDetail = ValidateDatagridRows("dgContractDetail");
+            if (!isValidForm || !isValidDetail || !isValidTemp) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            CallAjaxApprove("PUT", "Reject", ContractKey);
+        }
+
+        function onDelete(e, id) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function onDeleteEntry(e) {
+            e.preventDefault();
+            if (ContractKey) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(ContractKey);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function getDataMaster() {
+            let objMData = {};
+            objMData.ContractKey = ContractKey ? ContractKey : 0;
+            objMData.OldContractKey = TempKey ? TempKey : 0;
+            objMData.ContractCode = $('[id$=txtContractCode]').val();
+            objMData.ContractName = $('[id$=txtContractName]').val();
+            objMData.ContractTermByMonth = $('[id$=txtContractTermByMonth]').val() ? getInt($('[id$=txtContractTermByMonth]').val()) : 0;
+            objMData.ValidDate = $('[id$=txtValidDate]').val() ? $('[id$=txtValidDate]').val() : null;
+            objMData.Description = $('[id$=txtDescription]').val();
+            //objMData.Active = $("[id=cbActive]").prop('checked');
+            objMData.ContractDeclareKey = $("[id=cboContractDeclare]").combobox("getValue") ? getInt($("[id=cboContractDeclare]").combobox("getValue")) : null;
+            objMData.PartnerKey = $("[id=cboPartner]").combobox("getValue") ? getInt($("[id=cboPartner]").combobox("getValue")) : null;
+            objMData.BuildingKey = $("[id=cboBuilding]").combobox("getValue") ? getInt($("[id=cboBuilding]").combobox("getValue")) : null;
+            objMData.DepartmentKey = $("[id=cboDepartment]").combobox("getValues") ? $("[id=cboDepartment]").combobox("getValues")?.toString() : null;
+            objMData.BuildingSectionKey = $("[id=cboBuildingSection]").combobox("getValue") ? getInt($("[id=cboBuildingSection]").combobox("getValue")) : null;
+            objMData.CategoryKey = $("[id=cboCategory]").combobox("getValue") ? getInt($("[id=cboCategory]").combobox("getValue")) : null;
+
+            return objMData;
+        }
+
+        function getDataDetail() {
+            //Detail
+            let objDData = [];
+            $("[id=dgContractDetail]").datagrid("acceptChanges");
+            let detailData = $("[id=dgContractDetail]").datagrid("getData").rows;
+            if (detailData.length > 0) {
+                detailData.forEach(function addDetail(item, index) {
+                    let data = {};
+                    data.ContractDetailKey = item.ContractDetailKey ? getInt(item.ContractDetailKey) : null;
+                    data.ContractKey = item.ContractKey ? getInt(item.ContractKey) : null;
+                    data.ContractDeclareDetailKey = item.ContractDeclareDetailKey ? getInt(item.ContractDeclareDetailKey) : null;
+                    data.AnticipatePaymentDate = item.AnticipatePaymentDate ? item.AnticipatePaymentDate : null;
+                    data.AnticipatePaymentMonth = item.AnticipatePaymentMonth ? getFloat(item.AnticipatePaymentMonth) : null;
+                    data.DebtReasonKey = item.DebtReasonKey ? getInt(item.DebtReasonKey) : null;
+                    data.Amount = item.Amount ? getFloat(item.Amount) : 0;
+                    data.Description = item.Description;
+                    //data.Active = item.Active == 1 ? true : false;
+                    data.Status = item.Status == 1 ? true : false;
+                    data.DepositMonth = item.DepositMonth ? getFloat(item.DepositMonth) : 0;
+                    data.PenaltyFee = item.PenaltyFee ? getFloat(item.PenaltyFee) : 0;
+                    data.PenaltyFeeAfterDay = item.PenaltyFeeAfterDay ? getFloat(item.PenaltyFeeAfterDay) : 0;
+                    data.IncreaseRentAmount = item.IncreaseRentAmount ? getFloat(item.IncreaseRentAmount) : 0;
+                    data.IncreaseRentPerior = item.IncreaseRentPerior ? getFloat(item.IncreaseRentPerior) : 0;
+                    data.PaymentPeriod = item.PaymentPeriod ? getFloat(item.PaymentPeriod) : 0;
+                    data.PaymentDate = item.PaymentDate ? getFloat(item.PaymentDate) : 0;
+                    objDData.push(data);
+                });
+            }
+
+            return objDData;
+        }
+
+        function getDataTemp() {
+            //Detail
+            let objTData = [];
+            $("[id=dgContractDeclare]").datagrid("acceptChanges");
+            let tempData = $("[id=dgContractDeclare]").datagrid("getData").rows;
+            if (tempData.length > 0) {
+                tempData.forEach(function addDetail(item, index) {
+                    let data = {};
+                    data.ContractTempKey = item.ContractTempKey ? getInt(item.ContractTempKey) : null;
+                    data.ContractKey = item.ContractKey ? getInt(item.ContractKey) : null;
+                    data.ContractDeclareDetailKey = item.ContractDeclareDetailKey ? getInt(item.ContractDeclareDetailKey) : null;
+                    data.AnticipatePaymentDate = item.AnticipatePaymentDate ? item.AnticipatePaymentDate : null;
+                    data.AnticipatePaymentMonth = item.AnticipatePaymentMonth ? getFloat(item.AnticipatePaymentMonth) : null;
+                    data.DebtReasonKey = item.DebtReasonKey ? getInt(item.DebtReasonKey) : null;
+                    data.Amount = item.Amount ? getFloat(item.Amount) : 0;
+                    data.Description = item.Description;
+                    data.Active = item.Active == 1 ? true : false;
+                    data.DepositMonth = item.DepositMonth ? getFloat(item.DepositMonth) : 0;
+                    data.PenaltyFee = item.PenaltyFee ? getFloat(item.PenaltyFee) : 0;
+                    data.PenaltyFeeAfterDay = item.PenaltyFeeAfterDay ? getFloat(item.PenaltyFeeAfterDay) : 0;
+                    data.IncreaseRentAmount = item.IncreaseRentAmount ? getFloat(item.IncreaseRentAmount) : 0;
+                    data.IncreaseRentPerior = item.IncreaseRentPerior ? getFloat(item.IncreaseRentPerior) : 0;
+                    data.PaymentPeriod = item.PaymentPeriod ? getFloat(item.PaymentPeriod) : 0;
+                    data.PaymentDate = item.PaymentDate ? getFloat(item.PaymentDate) : 0;
+                    objTData.push(data);
+                });
+            }
+
+            return objTData;
+        }
+
+        //====================  Tabs CTDL Detail  =====================//
+        function BindingDataToGridCTDL(data) {
+            let toolbar = [
+                {
+                    text: "Thêm",
+                    id: "btnAddDetailGrid",
+                    iconCls: "icon-add",
+                    handler: addnewrow
+                },
+                {
+                    text: "Xóa",
+                    id: "btnDelDetailGrid",
+                    iconCls: "icon-remove",
+                    handler: removeit
+                },
+                {
+                    text: "Lưu tạm",
+                    id: "btnSaveTempDetailGrid",
+                    iconCls: "icon-save",
+                    handler: acceptitCTDL
+                }
+            ];
+            editIndexCTDL = undefined;
+
+            $("[id=dgContractDeclare]").datagrid("options").pageNumber = 1;
+            $("[id=dgContractDeclare]").datagrid({ data: [] });
+            $("[id=dgContractDeclare]").datagrid({
+                height: 200,
+                width: "100%",
+                rownumbers: true,
+                toolbar: toolbar,
+                autoRowHeight: true,
+                striped: false,
+                iconCls: "icon-list",
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                singleCheck: false,
+                pagination: false,
+                //loadFilter: pagerFilter,
+                //sortName: "JobSequence",
+                //sortOrder: "asc",
+                data: data,
+                columns: [
+                    [
+                        { field: "ContractDeclareDetailKey", width: 0, hidden: true },
+                        { field: "ContractDeclareKey", width: 0, hidden: true },
+                        {
+                            field: 'DebtReasonKey',
+                            title: 'Lý do',
+                            width: 200,
+                            formatter: function (value, row) {
+                                return row.DebtReasonName || value;
+                            },
+                            editor: {
+                                type: 'combotree',
+                                options: {
+                                    valueField: 'id',
+                                    textField: 'text',
+                                    icons: [{
+                                        iconCls: 'icon-clear',
+                                        handler: function (e) {
+                                            $(e.data.target).combotree('clear');
+                                        }
+                                    }],
+                                    readonly: false,
+                                    required: true,
+                                    editable: false,
+                                    data: objCombo.cboReasonData,
+                                    validType: "validCombotreeInGrid['[id$=dgContractDeclare]', 'DebtReasonKey']",
+                                    //onBeforeSelect: function (node) {
+                                    //    if (node.isparent) {
+                                    //        return false;
+                                    //    }
+                                    //    return true;
+                                    //}
+                                }
+                            }
+                        },
+                        {
+                            field: 'Amount',
+                            title: 'Tiền phải thu',
+                            formatter: function (value, row) {
+                                return row.Amount !== null ? accounting.formatNumber(row.Amount) : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'DepositMonth',
+                            title: 'Số tháng cọc',
+                            formatter: function (value, row) {
+                                return row.DepositMonth !== null ? accounting.formatNumber(row.DepositMonth, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PenaltyFee',
+                            title: 'Phí phạt (%)',
+                            formatter: function (value, row) {
+                                return row.PenaltyFee !== null ? accounting.formatNumber(row.PenaltyFee, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PenaltyFeeAfterDay',
+                            title: 'TG gia hạn phạt (Ngày)',
+                            formatter: function (value, row) {
+                                return row.PenaltyFeeAfterDay !== null ? accounting.formatNumber(row.PenaltyFeeAfterDay, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'IncreaseRentAmount',
+                            title: 'Tăng phí thuê (%)',
+                            formatter: function (value, row) {
+                                return row.IncreaseRentAmount !== null ? accounting.formatNumber(row.IncreaseRentAmount, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'IncreaseRentPerior',
+                            title: 'Kỳ hạn tăng phí (Tháng)',
+                            formatter: function (value, row) {
+                                return row.IncreaseRentPerior !== null ? accounting.formatNumber(row.IncreaseRentPerior, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PaymentPeriod',
+                            title: 'Kỳ thanh toán (tháng/lần)',
+                            formatter: function (value, row) {
+                                return row.PaymentPeriod !== null ? accounting.formatNumber(row.PaymentPeriod, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PaymentDate',
+                            title: 'Ngày thanh toán',
+                            formatter: function (value, row) {
+                                return row.PaymentDate !== null ? accounting.formatNumber(row.PaymentDate, 0, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',', min: 0, max: 31 } }
+                        },
+                        {
+                            field: "Description",
+                            title: "Mô tả",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'Active',
+                            title: "Trạng thái",
+                            width: '15%',
+                            align: 'center',
+                            formatter: function (value, row) {
+                                if (value == 1 || value == true) {
+                                    row.ActiveName = 'Sử dụng';
+                                } else {
+                                    row.ActiveName = 'Không sử dụng';
+                                }
+                                return row.ActiveName;
+                            },
+                            editor: { type: 'checkbox', options: { on: 1, off: 0 } }
+                        }
+                    ]
+                ],
+                onClickCell: function (index, field, value) {
+                    if (endEditingCTDL()) {
+                        $("[id=dgContractDeclare]").datagrid("selectRow", index).datagrid("beginEdit", index);
+                        var ed = $("[id=dgContractDeclare]").datagrid("getEditor", { index: index, field: field });
+                        if (ed) {
+                            ($(ed.target).data("textbox") ? $(ed.target).textbox("textbox") : $(ed.target)).focus();
+                        }
+                        editIndexCTDL = index;
+                    } else {
+                        setTimeout(function () {
+                            $("[id=dgContractDeclare]").datagrid("selectRow", editIndexCTDL);
+                        },
+                            0);
+                    }
+                    //set change
+                    flagChangeDeclare = true;
+                },
+                onBeginEdit: function (rowIndex, row) {
+                    editIndexCTDL = rowIndex;
+                },
+                onEndEdit: function (index, row) {
+                    var active = getInt(row.Active);
+                    row.ActiveName = active == 1 ? "Sử dụng" : "Không sử dụng";
+                    var ed = $(this).datagrid('getEditor',
+                        {
+                            index: index,
+                            field: 'DebtReasonKey'
+                        });
+                    row.DebtReasonName = $(ed.target).combotree('getText');
+                },
+                onAfterEdit: function (index, row) {
+                    //row.editing = true;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onCancelEdit: function (index, row) {
+                    row.editing = false;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onLoadSuccess: function (data) {
+                },
+                onSelect: function (index, row) {
+                },
+                onUnselect: function (index, row) {
+                }
+            });
+        }
+
+        function endEditingCTDL() {
+            if (editIndexCTDL == undefined) {
+                return true;
+            }
+            if ($("[id=dgContractDeclare]").datagrid("validateRow", editIndexCTDL)) {
+                $("[id=dgContractDeclare]").datagrid("endEdit", editIndexCTDL);
+                editIndexCTDL = undefined;
+                return true;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+        }
+
+        function acceptitCTDL() {
+            if (endEditingCTDL()) {
+                editIndexCTDL = undefined;
+            }
+        }
+
+        function removeit() {
+            if (editIndexCTDL !== undefined) {
+                let rowSelected = $("[id=dgContractDeclare]").datagrid("getRows")[editIndexCTDL];
+                $("[id=dgContractDeclare]").datagrid('cancelEdit', editIndexCTDL).datagrid('deleteRow', editIndexCTDL);
+                editIndexCTDL = undefined;
+            }
+            return false;
+        }
+        
+        function addnewrow() {
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.remove();
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            if (endEditingCTDL()) {
+                let count = $("[id=dgContractDeclare]").datagrid("getRows").length;
+                for (let i = 0; i < count; i++) {
+                    $("[id=dgContractDeclare]").datagrid("refreshRow", i).datagrid("collapseRow", i);
+                }
+
+                $("[id=dgContractDeclare]").datagrid("appendRow",
+                    {
+                        //BuildingSectionKey: 0,
+                        //BuildingKey: $('[id$=txtBuildingKey]').val() || 0,
+                        isAddNewRow: true,
+                    });
+                editIndexCTDL = $("[id=dgContractDeclare]").datagrid("getRows").length - 1;
+                $("[id=dgContractDeclare]").datagrid("selectRow", editIndexCTDL).datagrid("beginEdit", editIndexCTDL);
+
+            }
+        }
+        //====================  Tabs Detail  =====================//
+        function BindingDataToGrid(data) {
+            let toolbar = [
+                {
+                    text: "Tính chi tiết",
+                    id: "btnCalulatorDetailGrid",
+                    iconCls: "icon-edit",
+                    handler: calulatorit
+                },
+                {
+                    text: "Lưu tạm",
+                    id: "btnSaveTempDetailLGrid",
+                    iconCls: "icon-save",
+                    handler: acceptit
+                }
+            ];
+            editIndex = undefined;
+
+            $("[id=dgContractDetail]").datagrid("options").pageNumber = 1;
+            $("[id=dgContractDetail]").datagrid({ data: [] });
+            $("[id=dgContractDetail]").datagrid({
+                height: 400,
+                width: "100%",
+                rownumbers: true,
+                toolbar: toolbar,
+                autoRowHeight: true,
+                striped: false,
+                iconCls: "icon-list",
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                singleCheck: false,
+                pagination: false,
+                //loadFilter: pagerFilter,
+                //sortName: "AnticipatePaymentDate",
+                //sortOrder: "asc",
+                data: data,
+                columns: [
+                    [
+                        { field: "ContractDetailKey", width: 0, hidden: true },
+                        { field: "ContractKey", width: 0, hidden: true },
+                        { field: "ContractDeclareDetailKey", width: 0, hidden: true },
+                        {
+                            field: 'AnticipatePaymentDate',
+                            title: 'Dự kiến ngày thanh toán',
+                            width: 200,
+                            align: 'center',
+                            editor: {
+                                type: 'datebox',
+                                options: {
+                                    required: false,
+                                    readonly: false,
+                                    formatter: function myformatter(date) {
+                                        var y = date.getFullYear();
+                                        var m = date.getMonth() + 1;
+                                        var d = date.getDate();
+                                        return (d < 10 ? ('0' + d) : d) + '/' + (m < 10 ? ('0' + m) : m) + '/' + y;
+                                    },
+                                    parser: function myparser(s) {
+                                        if (!s) return new Date();
+                                        var ss = (s.split('/'));
+                                        var d = parseInt(ss[0], 10);
+                                        var m = parseInt(ss[1], 10);
+                                        var y = parseInt(ss[2], 10);
+                                        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                                            return new Date(y, m - 1, d);
+                                        } else {
+                                            return new Date();
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            field: 'AnticipatePaymentMonth',
+                            title: 'Dự kiến tháng thanh toán',
+                            width: 200,
+                            hidden: true,
+                            align: 'center',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'DebtReasonKey',
+                            title: 'Lý do',
+                            width: 250,
+                            formatter: function (value, row) {
+                                return row.DebtReasonName || value;
+                            },
+                            editor: {
+                                type: 'combotree',
+                                options: {
+                                    valueField: 'id',
+                                    textField: 'text',
+                                    icons: [{
+                                        iconCls: 'icon-clear',
+                                        handler: function (e) {
+                                            $(e.data.target).combotree('clear');
+                                        }
+                                    }],
+                                    readonly: false,
+                                    required: true,
+                                    editable: false,
+                                    data: objCombo.cboReasonData,
+                                    validType: "validCombotreeInGrid['[id$=dgContractDetail]', 'DebtReasonKey']",
+                                    //onBeforeSelect: function (node) {
+                                    //    if (node.isparent) {
+                                    //        return false;
+                                    //    }
+                                    //    return true;
+                                    //}
+                                }
+                            }
+                        },
+                        {
+                            field: 'Amount',
+                            title: 'Tiền phải thu',
+                            formatter: function (value, row) {
+                                return row.Amount !== 0 ? accounting.formatNumber(row.Amount) : 0;
+                            },
+                            width: 200,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'DepositMonth',
+                            title: 'Số tháng cọc',
+                            hidden: true,
+                            formatter: function (value, row) {
+                                return row.DepositMonth !== null ? accounting.formatNumber(row.DepositMonth, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PenaltyFee',
+                            title: 'Phí phạt (%)',
+                            hidden: true,
+                            formatter: function (value, row) {
+                                return row.PenaltyFee !== null ? accounting.formatNumber(row.PenaltyFee, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PenaltyFeeAfterDay',
+                            title: 'TG gia hạn phạt (Ngày)',
+                            hidden: true,
+                            formatter: function (value, row) {
+                                return row.PenaltyFeeAfterDay !== null ? accounting.formatNumber(row.PenaltyFeeAfterDay, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'IncreaseRentAmount',
+                            title: 'Tăng phí thuê (%)',
+                            hidden: true,
+                            formatter: function (value, row) {
+                                return row.IncreaseRentAmount !== null ? accounting.formatNumber(row.IncreaseRentAmount, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'IncreaseRentPerior',
+                            title: 'Kỳ hạn tăng phí (Tháng)',
+                            hidden: true,
+                            formatter: function (value, row) {
+                                return row.IncreaseRentPerior !== null ? accounting.formatNumber(row.IncreaseRentPerior, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PaymentPeriod',
+                            title: 'Kỳ thanh toán (tháng/lần)',
+                            hidden: true,
+                            formatter: function (value, row) {
+                                return row.PaymentPeriod !== null ? accounting.formatNumber(row.PaymentPeriod, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PaymentDate',
+                            title: 'Ngày thanh toán',
+                            hidden: true,
+                            formatter: function (value, row) {
+                                return row.PaymentDate !== null ? accounting.formatNumber(row.PaymentDate, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',', min: 0, max: 31 } }
+                        },
+                        {
+                            field: "Description",
+                            title: "Mô tả",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'Status',
+                            title: "Trạng thái",
+                            width: '15%',
+                            align: 'center',
+                            formatter: function (value, row) {
+                                if (value == 1 || value == true) {
+                                    row.StatusName = 'Đã thanh toán';
+                                } else {
+                                    row.StatusName = 'Chưa thanh toán';
+                                }
+                                return row.StatusName;
+                            },
+                            editor: { type: 'checkbox', options: { on: 1, off: 0 } }
+                        }
+                    ]
+                ],
+                onClickCell: function (index, field, value) {
+                    if (endEditing()) {
+                        $("[id=dgContractDetail]").datagrid("selectRow", index).datagrid("beginEdit", index);
+                        var ed = $("[id=dgContractDetail]").datagrid("getEditor", { index: index, field: field });
+                        if (ed) {
+                            ($(ed.target).data("textbox") ? $(ed.target).textbox("textbox") : $(ed.target)).focus();
+                        }
+                        editIndex = index;
+                    } else {
+                        setTimeout(function () {
+                            $("[id=dgContractDetail]").datagrid("selectRow", editIndex);
+                        },
+                            0);
+                    }
+                },
+                onBeginEdit: function (rowIndex, row) {
+                    editIndex = rowIndex;
+                },
+                onEndEdit: function (index, row) {
+                    var status = getInt(row.Status);
+                    row.StatusName = status == 1 ? "Đã thanh toán" : "Chưa thanh toán";
+                    var ed = $(this).datagrid('getEditor',
+                        {
+                            index: index,
+                            field: 'DebtReasonKey'
+                        });
+                    row.DebtReasonName = $(ed.target).combobox('getText');
+                },
+                onAfterEdit: function (index, row) {
+                    //row.editing = true;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onCancelEdit: function (index, row) {
+                    row.editing = false;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onLoadSuccess: function (data) {
+                },
+                onSelect: function (index, row) {
+                },
+                onUnselect: function (index, row) {
+                }
+            });
+        }
+
+        function endEditing() {
+            if (editIndex == undefined) {
+                return true;
+            }
+            if ($("[id=dgContractDetail]").datagrid("validateRow", editIndex)) {
+                $("[id=dgContractDetail]").datagrid("endEdit", editIndex);
+                editIndex = undefined;
+                return true;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+        }
+
+        function acceptit() {
+            if (endEditing()) {
+                editIndex = undefined;
+            }
+        }
+
+        function calulatorit() {
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidDetail = ValidateDatagridRows("dgContractDeclare");
+            let isValidCombo = ValidCombo();
+            if (!isValidForm || !isValidDetail || !isValidCombo) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            let masterKey = ContractKey;
+            $("[id=dgContractDetail]").datagrid("acceptChanges");
+            var detailList = $("[id=dgContractDetail]").datagrid("getData").rows;
+            if (masterKey > 0 && detailList.length > 0 && detailList[0].ContractDetailKey > 0) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00020,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDeleteDetail("DeleteDetailByMaster", masterKey);
+                            //calDetailContract();
+                            GetDataCalculator();
+                        }
+                    });
+                return false;
+            } else {
+                //calDetailContract();
+                GetDataCalculator();
+            }
+            //flagChangeDeclare = false;
+        }
+
+        function calDetailContract() {
+            let contractDeclareKey = $("[id=cboContractDeclare]").combobox("getValue");
+            $("[id=dgContractDeclare]").datagrid("acceptChanges");
+            lstDetailDeclare = $("[id=dgContractDeclare]").datagrid("getData").rows;
+            //if (lstDetailDeclare.length <= 0) {
+            //    lstDetailDeclare = getDataFromApiSyncParams("/ContractDeclare/GetDetailById/" + contractDeclareKey, FunctionID, null)
+            //}
+            if (lstDetailDeclare.length > 0) {
+                let detailData = [];
+                lstDetailDeclare.forEach((el) => {
+                    let term = $("#txtContractTermByMonth").val() ? getInt($("#txtContractTermByMonth").val()) : 0,
+                        period = el.PaymentPeriod ? getFloat(el.PaymentPeriod) : 0,
+                        pdate = el.PaymentDate ? getInt(el.PaymentDate) : 0,
+                        validDate = $("#txtValidDate").val(),
+                        paymentDate = moment(pdate + "/" + moment(validDate, "DD/MM/YYYY").format("MM/YYYY"), "DD/MM/YYYY").format("DD/MM/YYYY"),
+                        increaseRentPerior = el.IncreaseRentPerior ? getInt(el.IncreaseRentPerior) : 0,
+                        increaseRentAmount = el.IncreaseRentAmount ? getFloat(el.IncreaseRentAmount) : 0;
+                    if (period > 0 && term > 0) {
+                        for (var i = 0; i < term; i += period) {
+                            let dInPerior = i / period;
+                            let objDtl = {
+                                ContractDetailKey: 0,
+                                ContractKey: 0,
+                                ContractDeclareDetailKey: el.ContractDeclareDetailKey,
+                                AnticipatePaymentDate: moment(paymentDate, "DD/MM/YYYY").add(i, 'M').format("DD/MM/YYYY"),
+                                AnticipatePaymentMonth: moment(paymentDate, "DD/MM/YYYY").add(i, 'M').format("MM"),
+                                DebtReasonKey: el.DebtReasonKey,
+                                DebtReasonName: el.DebtReasonName,
+                                Amount: getFloat(el.Amount) + (dInPerior * ((increaseRentAmount / 100) * getFloat(el.Amount))),
+                                DepositMonth: el.DepositMonth,
+                                PenaltyFee: el.PenaltyFee,
+                                PenaltyFeeAfterDay: el.PenaltyFeeAfterDay,
+                                IncreaseRentAmount: el.IncreaseRentAmount,
+                                IncreaseRentPerior: el.IncreaseRentPerior,
+                                PaymentPeriod: el.PaymentPeriod,
+                                PaymentDate: el.PaymentDate,
+                                Description: el.Description,
+                                Active: false,
+                                SortDate: moment(paymentDate, "DD/MM/YYYY").add(i, 'M')
+                            }
+                            detailData.push(objDtl);
+                        };
+                    }
+                    else {
+                        toastr.warning(VNMessageR.COMMON_00021);
+                    }
+                });
+                detailData = _.orderBy(detailData, ['SortDate'], ['asc']);
+                BindingDataToGrid(detailData);
+            }
+        }
+
+        function initButton(key) {
+            if (key > 0) {
+                $("[id=divCreate]").css("display", "none");
+                $("[id=divUpdate]").css("display", "");
+                $("[id=divDelete]").css("display", "");
+                $("[id=divApprove]").css("display", "");
+                $("[id=divReject]").css("display", "");
+                $("[id=divCopyNew]").css("display", "");
+            } else {
+                $("[id=divCreate]").css("display", "");
+                $("[id=divUpdate]").css("display", "none");
+                $("[id=divDelete]").css("display", "none");
+                $("[id=divApprove]").css("display", "none");
+                $("[id=divReject]").css("display", "none");
+                $("[id=divCopyNew]").css("display", "none");
+            }
+        }
+
+        function resetFormData() {
+            initButton();
+            $("[id=txtContractCode]").prop("readonly", false);
+            $("[id=contractModal]").find("input[type=text],input[type=number],input[type=file], textarea").val("");
+            $("[id=contractModal]").find("input[type=checkbox]").prop("checked", true);
+            var fileUpload = document.getElementById('txtFileUpload');
+            fileUpload.value = '';
+            fileUpload.dispatchEvent(new Event('change'));
+            $("[id$=cboContractDeclare]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboContractDeclare').combobox('setValue', null);
+                },
+                readonly: false
+            });
+            $('[id$=cboPartner').combobox('setValue', null);
+            $('[id$=cboBuilding').combobox('setValue', null);
+            $('[id$=cboDepartment').combobox('setValues', []);
+            $('[id$=cboBuildingSection').combobox('setValue', null);
+            $('[id$=cboCategory').combobox('setValue', null);
+            //reload datagrid
+            BindingDataToGrid([]);
+            $("#divUploadDocuments").html("");
+            $("#frmDocument").css("display", "block");
+
+            setTimeout(function () {
+                checkShowAllField(false);
+            }, 10);
+        };
+
+        function setFormData(data) {
+            initButton(data.ContractKey);
+            $("[id=txtContractCode]").prop("readonly", true);
+            //$("[id$=cbActive]").prop('checked', data.Active);
+            $("[id$=cboBuilding]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuilding').combobox('setValue', data.BuildingKey);
+                }
+            });
+            $("[id$=cboBuildingSection]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuildingSection').combobox('setValue', data.BuildingSectionKey);
+                }
+            });
+            $("[id$=cboPartner]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboPartner').combobox('setValue', data.PartnerKey);
+                }
+            });
+            $("[id$=cboDepartment]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboDepartment').combobox('setValues', data.DepartmentKey?.split(","));
+                }
+            });
+            $("[id$=cboCategory]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboCategory').combobox('setValue', data.CategoryKey);
+                }
+            });
+            $("[id$=cboContractDeclare]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboContractDeclare').combobox('setValue', data.ContractDeclareKey);
+                },
+                //readonly: true
+            });
+            setTimeout(function () {
+                $('[id$=txtContractCode]').val(data.ContractCode);
+                $('[id$=txtContractName]').val(data.ContractName);
+                $('[id$=txtContractTermByMonth]').val(data.ContractTermByMonth);
+                $('[id$=txtValidDate]').val(data.ValidDate);
+                $('[id$=txtDescription]').val(data.Description);
+                //objCombo.cboDepartmentData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/department-by-contract?buildKey=${data.BuildingKey}&buildSectionKey=${data.BuildingSectionKey}&validDate=${data.DateExpires}&contractKey=${ContractKey}&active=1`);
+                //$("[id$=cboDepartment]").combobox({
+                //    data: objCombo.cboDepartmentData,
+                //    onLoadSuccess: function () {
+                //        $('[id$=cboDepartment').combobox('setValues', data.DepartmentKey?.split(","));
+                //    }
+                //}); 
+
+                checkShowAllField(data.Status);
+            }, 300);
+        };
+
+        function resetFormDatabyDeclare() {
+            $('[id$=txtContractTermByMonth]').val();
+            $('[id$=txtValidDate]').val();
+            $('[id$=txtDescription]').val();
+            BindingDataToGridCTDL([]);
+        };
+
+        function setFormDatabyDeclare(data) {
+            $('[id$=txtContractTermByMonth]').val(data.ContractTermByMonth);
+            $('[id$=txtValidDate]').val(data.ValidDate);
+            $('[id$=txtDescription]').val(data.Description);
+        };
+
+        function onDeleteFileUpload(e, id, masterKey) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            ajaxindicatorstart(VNMessageR.COMMON_00011);
+                            $.ajax({
+                                type: "DELETE",
+                                url: "/Contract/DeleteFileUpload/" + id,
+                                headers: { 'FunctionID': FunctionID },
+                                dataType: "json",
+                                success: function (msg) {
+                                    if (msg.Success) {
+                                        toastr.success(VNMessageR.COMMON_00012);
+                                        setTimeout(function () {
+                                            onGetDocumentByKey(masterKey);
+                                        },
+                                            200);
+                                    } else {
+                                        ToastrErr(msg);
+                                    }
+                                    ajaxindicatorstop();
+                                },
+                                error: function (err) {
+                                    ToastrException(err);
+                                    ajaxindicatorstop();
+                                }
+                            });
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/Contract/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    //$('#contractModal').modal('hide');
+                                    //onUploadFile(msg.Data);
+                                    setTimeout(function () {
+                                        window.OpenNewUrlOnIframe("edit", FunctionID, msg.Data, null);
+                                        //reload current page
+                                        $("#tblContract").DataTable().ajax.reload(null, false);
+                                    },
+                                        500);
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    //onUploadFile(objData.Contract.ContractKey);
+                                    setTimeout(function () {
+                                        window.ReloadUrlOnIframe();
+                                        //reload current page
+                                        //$("#tblContract").DataTable().ajax.reload(null, false);
+                                    },
+                                        500);
+                                    //$('#contractModal').modal('hide');
+                                    break;
+                            };
+                        } else {
+                            ToastrErr(msg);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxApprove(type, mode, key) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: type,
+                    url: `/Contract/${mode}/${key}`,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json;",
+                    success: function (msg) {
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Approve":
+                                    toastr.success(VNMessageR.COMMON_00018);
+                                    //$('#contractModal').modal('hide');
+                                    break;
+                                case "Reject":
+                                    toastr.success(VNMessageR.COMMON_00019);
+                                    //$('#contractModal').modal('hide');
+                                    break;
+                            };
+                            setTimeout(function () {
+                                resetFormData();
+                                onGetByID(key);
+                                //reload current page
+                                $("#tblContract").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDelete(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/Contract/Delete/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            $('#contractModal').modal('hide');
+                            setTimeout(function () {
+                                //reload current page
+                                $("#tblContract").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDeleteDetail(mode, id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: `/Contract/${mode}/` + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "DeleteDetail":
+                                    toastr.success(VNMessageR.COMMON_00012);
+                                    $("[id=dgContractDetail]").datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+                                    break;
+                                case "DeleteDetailByMaster":
+                                    //toastr.success(VNMessageR.COMMON_00012);
+                                    break;
+                            };
+                            editIndex = undefined;
+                        } else {
+                            ToastrErr(msg);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxUploadDocs(objParams) {
+            var formData = new FormData();
+            formData.append('MasterKey', objParams.MasterKey);
+            if (objParams.File.length > 0) {
+                $(objParams.File).each(function (i, vf) {
+                    formData.append('file' + i, vf, vf.name);
+                });
+            };
+            ajaxindicatorstart(VNMessageR.COMMON_00011);
+            $.ajax({
+                type: 'POST',
+                headers: { 'FunctionID': FunctionID },
+                url: "/Contract/UploadFiles",
+                dataType: 'json',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (msg) {
+                    if (msg.Success) {
+                        toastr.success(VNMessageR.COMMON_00017);
+                        setTimeout(function () {
+                            onGetDocumentByKey(objParams.MasterKey);
+                        },
+                            500);
+                    } else {
+                        ToastrErr(msg);
+                    }
+                    ajaxindicatorstop();
+                },
+                error: function (err) {
+                    ToastrException(err);
+                    ajaxindicatorstop();
+                }
+            });
+        }
+
+        function onCopyContract(e) {
+            //OpenUrlDetail(38, 0, null, false, `&tempKey=${ContractKey}`);
+            window.OpenNewUrlOnIframe("add", 38, null, `&tempKey=${ContractKey}`);
+        }
+
+        function ValidCombo() {
+            var flag = true;
+            if ($('[id$=cboDepartment]').combobox('getValue') !== "") {
+                $('[id$=cboDepartment]').closest("span.combo").css("border-color", "#D5D5D5");
+            } else {
+                flag = false;
+                $('[id$=cboDepartment]').closest("span.combo").css("border-color", "red");
+            }
+            return flag;
+        }
+    </script>
+}

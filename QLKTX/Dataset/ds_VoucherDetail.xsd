@@ -1,0 +1,31 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="ds_VoucherDetail" targetNamespace="http://tempuri.org/ds_VoucherDetail.xsd" xmlns:mstns="http://tempuri.org/ds_VoucherDetail.xsd" xmlns="http://tempuri.org/ds_VoucherDetail.xsd" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata" xmlns:msprop="urn:schemas-microsoft-com:xml-msprop" attributeFormDefault="qualified" elementFormDefault="qualified">
+  <xs:annotation>
+    <xs:appinfo source="urn:schemas-microsoft-com:xml-msdatasource">
+      <DataSource DefaultConnectionIndex="0" FunctionsComponentName="QueriesTableAdapter" Modifier="AutoLayout, AnsiClass, Class, Public" SchemaSerializationMode="IncludeSchema" xmlns="urn:schemas-microsoft-com:xml-msdatasource">
+        <Connections />
+        <Tables />
+        <Sources />
+      </DataSource>
+    </xs:appinfo>
+  </xs:annotation>
+  <xs:element name="ds_VoucherDetail" msdata:IsDataSet="true" msdata:UseCurrentLocale="true" msprop:Generator_UserDSName="ds_VoucherDetail" msprop:EnableTableAdapterManager="true" msprop:Generator_DataSetName="ds_VoucherDetail">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="ds_VoucherDetail" msprop:Generator_RowClassName="ds_VoucherDetailRow" msprop:Generator_RowEvHandlerName="ds_VoucherDetailRowChangeEventHandler" msprop:Generator_RowDeletedName="ds_VoucherDetailRowDeleted" msprop:Generator_RowDeletingName="ds_VoucherDetailRowDeleting" msprop:Generator_RowEvArgName="ds_VoucherDetailRowChangeEvent" msprop:Generator_TablePropName="_ds_VoucherDetail" msprop:Generator_RowChangedName="ds_VoucherDetailRowChanged" msprop:Generator_UserTableName="ds_VoucherDetail" msprop:Generator_RowChangingName="ds_VoucherDetailRowChanging" msprop:Generator_TableClassName="ds_VoucherDetailDataTable" msprop:Generator_TableVarName="tableds_VoucherDetail">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="BuildingCode" msprop:Generator_ColumnPropNameInRow="BuildingCode" msprop:Generator_ColumnPropNameInTable="BuildingCodeColumn" msprop:Generator_ColumnVarNameInTable="columnBuildingCode" msprop:Generator_UserColumnName="BuildingCode" type="xs:string" minOccurs="0" />
+              <xs:element name="BuildingName" msprop:Generator_ColumnPropNameInRow="BuildingName" msprop:Generator_ColumnPropNameInTable="BuildingNameColumn" msprop:Generator_ColumnVarNameInTable="columnBuildingName" msprop:Generator_UserColumnName="BuildingName" type="xs:string" minOccurs="0" />
+              <xs:element name="InAmount" msprop:Generator_ColumnPropNameInRow="InAmount" msprop:Generator_ColumnPropNameInTable="InAmountColumn" msprop:Generator_ColumnVarNameInTable="columnInAmount" msprop:Generator_UserColumnName="InAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="OutAmount" msprop:Generator_ColumnPropNameInRow="OutAmount" msprop:Generator_ColumnPropNameInTable="OutAmountColumn" msprop:Generator_ColumnVarNameInTable="columnOutAmount" msprop:Generator_UserColumnName="OutAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="RemainAmount" msprop:Generator_ColumnPropNameInRow="RemainAmount" msprop:Generator_ColumnPropNameInTable="RemainAmountColumn" msprop:Generator_ColumnVarNameInTable="columnRemainAmount" msprop:Generator_UserColumnName="RemainAmount" type="xs:string" minOccurs="0" />
+              <xs:element name="TransDate" msprop:Generator_ColumnPropNameInRow="TransDate" msprop:Generator_ColumnPropNameInTable="TransDateColumn" msprop:Generator_ColumnVarNameInTable="columnTransDate" msprop:Generator_UserColumnName="TransDate" type="xs:string" minOccurs="0" />
+              <xs:element name="TransNo" msprop:Generator_ColumnPropNameInRow="TransNo" msprop:Generator_ColumnPropNameInTable="TransNoColumn" msprop:Generator_ColumnVarNameInTable="columnTransNo" msprop:Generator_UserColumnName="TransNo" type="xs:string" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

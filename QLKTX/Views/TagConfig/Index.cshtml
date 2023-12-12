@@ -1,0 +1,412 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Cấu hình thẻ cảnh báo";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="openCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS Cấu hình thẻ cảnh báo</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblTagConfig" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã thẻ</th>
+                                <th>Tên thẻ</th>
+                                <th>Mã màu</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="tagConfigModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Thêm/Cập nhật</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã thẻ</label>
+                            <input type="text" id="txtTagConfigCode" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            <input type="hidden" id="txtTagConfigKey" class="form-control form-control-sm" autocomplete="off" readonly />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Tên thẻ</label>
+                            <input type="text" id="txtTagConfigName" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã màu</label>
+                            <input type="color" id="txtColorCode" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mô tả</label>
+                            <input type="text" id="txtDescription" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbActive">
+                            <label class="form-check-label" for="cbActive">Sử dụng</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <div id="divCreate" class="form-group">
+                    <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+                </div>
+                <div id="divUpdate" class="form-group" style="display:none;">
+                    <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var lstTagConfigList = [];
+        var funcSearchModel = {
+            SearchParams: null
+        };
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function onSearchPaging() {
+            funcSearchModel.SearchParams = $("[id=txtSearch]").val().trim();
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblTagConfig").DataTable().destroy();
+            $("#tblTagConfig tbody").empty(); // empty tbody
+            $("#tblTagConfig").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/TagConfig/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.SearchParams = funcSearchModel.SearchParams;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        lstTagConfigList = json.data;
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "TagConfigCode", "sortable": true },
+                    { "data": "TagConfigName", "sortable": true },
+                    { "data": "ColorCode", "sortable": true },
+                    {
+                        "data": "Active", "sortable": false,
+                        "className": "text-center",
+                        "width": 150,
+                        "render": function (data, type, full, meta) {
+                            return full.Active
+                                ? `<span class="label label-sm label-info-bt arrowed arrowed-righ">Sử dụng</span>`
+                                : `<span class="label label-sm label-danger arrowed arrowed-righ">Không sử dụng</span>`;
+                        }
+                    },
+                    {
+                        "className": "text-center project-actions text-right",
+                        "sortable": false,
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            var actionStr = "";
+                            if (full.TagConfigKey) {
+                                actionStr = `<button class="btn btn-info btn-xs" onclick = "openEdit(event, '${full.TagConfigKey}')"> <i class="fas fa-pencil-alt"> </i> Sửa </button>&nbsp;`;
+                                actionStr += `<button class="btn btn-danger btn-xs" onclick = "onDelete(event, '${full.TagConfigKey}')" @(Model.FUPermiss.FDel ? "" : "disabled")> <i class="fas fa-trash"> </i> Xóa </button>&nbsp;`;
+                            }
+                            return actionStr;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            TagConfigCode: $("[id=txtTagConfigCode]").val(),
+                            TagConfigName: $("[id=txtTagConfigName").val(),
+                            ColorCode: $("[id=txtColorCode]").val(),
+                            Description: $("[id=txtDescription]").val(),
+                            Active: $("[id=cbActive]").prop("checked")
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            TagConfigKey: $("[id=txtTagConfigKey]").val(),
+                            TagConfigCode: $("[id=txtTagConfigCode]").val(),
+                            TagConfigName: $("[id=txtTagConfigName").val(),
+                            ColorCode: $("[id=txtColorCode]").val(),
+                            Description: $("[id=txtDescription]").val(),
+                            Active: $("[id=cbActive]").prop("checked")
+                        };
+                        CallAjaxSave("Update", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function resetFormData() {
+            $("[id=divCreate]").css("display", "");
+            $("[id=divUpdate]").css("display", "none");
+            $("[id$=txtTagConfigCode]").prop("readonly", false);
+            $("[id=tagConfigModal]").find("input[type=text],input[type=number], textarea").val("");
+            $("[id=tagConfigModal]").find("input[type=checkbox]").prop("checked", true);
+        };
+
+        function setFormData(data) {
+            $("[id=divCreate]").css("display", "none");
+            $("[id=divUpdate]").css("display", "");
+            //$("[id$=txtDeviceCode]").prop("readonly", false);
+            $('[id$=txtTagConfigKey]').val(data.TagConfigKey);
+            $('[id$=txtTagConfigCode]').val(data.TagConfigCode);
+            $('[id$=txtTagConfigName]').val(data.TagConfigName);
+            $('[id$=txtColorCode]').val(data.ColorCode);
+            $('[id$=txtDescription]').val(data.Description);
+            $("[id$=cbActive]").prop('checked', data.Active);
+        };
+
+        function onDelete(e, id) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/TagConfig/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    $('#tagConfigModal').modal('hide');
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    $('#tagConfigModal').modal('hide');
+                                    break;
+                            };
+
+                            setTimeout(function () {
+                                //reload current page
+                                $("#tblTagConfig").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDelete(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/TagConfig/Delete/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            setTimeout(function () {
+                                //reload current page
+                                $("#tblTagConfig").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        //open modal
+        function openCreateNew() {
+            resetFormData();
+            $('#tagConfigModal').modal('show');
+        }
+
+        function openEdit(e, id) {
+            resetFormData();
+            var data = lstTagConfigList.find(x => x.TagConfigKey == id);
+            setFormData(data);
+            $('#tagConfigModal').modal('show');
+        }
+
+    </script>
+}

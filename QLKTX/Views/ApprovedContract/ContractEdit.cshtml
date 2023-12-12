@@ -1,0 +1,159 @@
+﻿@using System.Globalization
+@model QLKTX.Models.ContractVViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Thông tin hợp đồng";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Sửa HĐ</h3>
+                </div>
+                <div class="card-body" style="padding:0rem;">
+                    @*<div id="editor"></div>*@
+                    <textarea name="editor1"></textarea>
+                </div>
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-success" onclick="onGetBindingContractView(event)" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-sync"></i> Lấy thông tin</button>
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSave(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")><i class="fa fa-save"></i> Lưu</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+        let contractKey = @Model.ContractKey ? getInt(@Model.ContractKey) : 0;
+
+        $(document).ready(async function () {
+            //ClassicEditor
+            //    .create(document.querySelector('#editor'))
+            //    .then(editor => {
+            //        console.log(editor);
+            //    })
+            //    .catch(error => {
+            //        console.error(error);
+            //    });
+
+            var editor = CKEDITOR.replace('editor1');
+            $.ajaxSettings.async = false;
+            onGetContractView(contractKey);
+            $.ajaxSettings.async = true;
+        });
+
+        function onGetContractView(contractKey) {
+            if (contractKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/ApprovedContract/GetContractView/" + contractKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.Success) {
+                            CKEDITOR.instances['editor1'].setData(result.Data?.ContractView);
+                        } else {
+                            CKEDITOR.instances['editor1'].setData([]);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                CKEDITOR.instances['editor1'].setData([]);
+            }
+        }
+
+        function onGetBindingContractView(e) {
+            if (contractKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/ApprovedContract/GetBindingContractView/" + contractKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.Success) {
+                            CKEDITOR.instances['editor1'].setData(result.Data?.ContractView);
+                        } else {
+                            CKEDITOR.instances['editor1'].setData([]);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                CKEDITOR.instances['editor1'].setData([]);
+            }
+        }
+
+        function onSave(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            ContractKey: @Model.ContractKey ? getInt(@Model.ContractKey) : 0,
+                            ContractView: CKEDITOR.instances.editor1.getData()
+                        };
+                        CallAjaxSave("UpdateContractView", objSave);
+                    }
+                });
+            return false;
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "PUT",
+                    url: "/ApprovedContract/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00003);
+                            setTimeout(function () {
+                                onGetContractView(contractKey);
+                            }, 500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+    </script>
+}

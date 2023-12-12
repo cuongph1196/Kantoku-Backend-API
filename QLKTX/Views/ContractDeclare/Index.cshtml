@@ -1,0 +1,979 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Thiết lập hợp đồng mẫu";
+}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Dự án</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuilding" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Khu vực</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuildingSection" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button type="button" class="btn btn-sm btn-success" data-toggle="modal" onclick="javascript: openCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Thiết lập hợp đồng mẫu</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblContractDeclare" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã HĐ mẫu</th>
+                                <th>Tên HĐ mẫu</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="contractModal">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Thêm/Cập nhật</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã HĐ</label>
+                            <input type="text" id="txtContractDeclareCode" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            <input type="hidden" id="txtContractDeclareKey" class="form-control form-control-sm" autocomplete="off" readonly />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Tên HĐ</label>
+                            <input type="text" id="txtContractDeclareName" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Dự án</label>
+                            <div class="">
+                                <input type="text" id="cboBuilding" class="easyui-combobox entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Khu vực</label>
+                            <div class="">
+                                <input type="text" id="cboBuildingSection" class="easyui-combobox entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Ngành hàng</label>
+                            <div class="">
+                                <input type="text" id="cboCategory" class="easyui-combobox entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Kỳ hạn HĐ (tháng)</label>
+                            <input type="number" id="txtContractTermByMonth" class="form-control form-control-sm" autocomplete="off" min="0" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label>Ngày hiệu lực</label>
+                            <div class="input-group date">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                </div>
+                                <input id="txtValidDate" type="text" class="form-control form-control-sm date-picker" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mô tả</label>
+                            <input type="text" id="txtDescription" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbActive">
+                            <label class="form-check-label" for="cbActive">Sử dụng</label>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <table id="dgContractDeclareDetail" class="easyui-datagrid table-data" title="DS chi tiết" style="height: 400px;"></table>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-center align-items-center">
+                @*<button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>*@
+                <div id="divCreate" class="form-group">
+                    <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+                </div>
+                <div id="divUpdate" class="form-group" style="display:none;">
+                    <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+                </div>
+                <div id="divDelete" class="form-group" style="display:none;">
+                    <button type="button" id="btnDelete" class="btn btn-danger" onclick="onDeleteEntry(event)" @(Model.FUPermiss.FDel ? "" : "disabled")>Xóa</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+
+        var searchModel = {
+            SearchParams: null,
+            BuildingKey: null,
+            BuildingSectionKey: null,
+        };
+        var objCombo = {
+            cboBuildingData: [],
+            cboBuildingSectionData: [],
+            cboReasonData: [],
+            cboCategoryData: []
+        };
+        var objDataEntry = {
+            objContractDeclare: {},
+            arrCDDetails: []
+        };
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            initCombo();
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboBuilding', false, 300);
+            objCombo.cboReasonData = getDataComboTree(ProjectCF.configs.baseApi + "/Common/combotree/reason?typeId=PTHU&active=1");
+            objCombo.cboCategoryData = getDataCombobox(ProjectCF.configs.baseApi + "/Common/combobox/category?active=1");
+            initComboBox(objCombo.cboCategoryData, 'cboCategory', false, 300);
+            $("[id=cboBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboBuildingSection', false, 300);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboBuildingSection', false, 300);
+                }
+            });
+            initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', false, 300);
+            $("[id=cboSearchBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboSearchBuildingSection', false, 300);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboSearchBuildingSection', false, 300);
+                }
+            });
+
+            $.ajaxSettings.async = true;
+        }
+
+        function onSearchPaging() {
+            searchModel.SearchParams = $("[id=txtSearch]").val().trim();
+            searchModel.BuildingKey = $("[id=cboSearchBuilding]").combobox("getValue");
+            searchModel.BuildingSectionKey = $("[id=cboSearchBuildingSection]").combobox("getValue");
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblContractDeclare").DataTable().destroy();
+            $("#tblContractDeclare tbody").empty(); // empty tbody
+            $("#tblContractDeclare").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/ContractDeclare/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.SearchParams = searchModel.SearchParams;
+                        dataSearch.BuildingKey = searchModel.BuildingKey;
+                        dataSearch.BuildingSectionKey = searchModel.BuildingSectionKey;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "ContractDeclareCode", "sortable": true },
+                    { "data": "ContractDeclareName", "sortable": true },
+                    { "data": "Description", "sortable": false },
+                    {
+                        "data": "Active", "sortable": false,
+                        "className": "text-center",
+                        "width": 150,
+                        "render": function (data, type, full, meta) {
+                            return full.Active
+                                ? `<span class="label label-sm label-info-bt arrowed arrowed-righ">Sử dụng</span>`
+                                : `<span class="label label-sm label-danger arrowed arrowed-righ">Không sử dụng</span>`;
+                        }
+                    },
+                    {
+                        "className": "text-center project-actions text-right",
+                        "sortable": false,
+                        "width": 200,
+                        "render": function (data, type, full, meta) {
+                            var actionStr = "";
+                            if (full.ContractDeclareKey) {
+                                actionStr = `<button class="btn btn-info btn-xs" onclick = "openEdit(event, '${full.ContractDeclareKey}')"> <i class="fas fa-pencil-alt"> </i> Sửa </button>&nbsp;`;
+                                actionStr += `<button class="btn btn-danger btn-xs" onclick = "onDelete(event, '${full.ContractDeclareKey}')" @(Model.FUPermiss.FDel ? "" : "disabled")> <i class="fas fa-trash"> </i> Xóa </button>&nbsp;`;
+                                actionStr += `<a type="button" class="btn btn-success btn-xs" method="get" href="/ContractDeclare/SampleContract?ModuleID=${@Model.ModuleID}&FunctionID=${@Model.FunctionID}&ContractDeclareKey=${full.ContractDeclareKey}"><i class="fas fa-eye"></i> HĐ mẫu</a>&nbsp;`;
+                            }
+                            return actionStr;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function onGetByID(contractDeclareKey) {
+            if (contractDeclareKey > 0) {
+                //var objParams = {
+                //    buildingKey
+                //};
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/ContractDeclare/GetById/" + contractDeclareKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    //data: objParams,
+                    success: function (result) {
+                        if (result.Success) {
+                            bindingDataToForm(result.Data);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                BindingDataToGrid([]);
+            }
+        }
+
+        function bindingDataToForm(data) {
+            if (data == null) {
+                BindingDataToGrid([]);
+            }
+            else {
+                objDataEntry.objContractDeclare = data.ContractDeclare;
+                objDataEntry.arrCDDetails = data.CDDetails;
+                setFormData(objDataEntry.objContractDeclare);
+                setTimeout(() => {
+                    if (objDataEntry.arrCDDetails != null && objDataEntry.arrCDDetails.length > 0)
+                        BindingDataToGrid(objDataEntry.arrCDDetails);
+                    else
+                        BindingDataToGrid([]);
+                }, 500);
+            }
+        }
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            ContractDeclare: getDataMaster(),
+                            CDDetails: getDataDetail()
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            ContractDeclare: getDataMaster(),
+                            CDDetails: getDataDetail()
+                        };
+                        CallAjaxSave("Update", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onDelete(e, id) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function onDeleteEntry(e) {
+            e.preventDefault();
+            var id = $('[id$=txtContractDeclareKey]').val();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function getDataMaster() {
+            let objMData = {};
+            objMData.ContractDeclareKey = $('[id$=txtContractDeclareKey]').val() ? getInt($('[id$=txtContractDeclareKey]').val()) : null;
+            objMData.ContractDeclareCode = $('[id$=txtContractDeclareCode]').val();
+            objMData.ContractDeclareName = $('[id$=txtContractDeclareName]').val();
+            objMData.ContractTermByMonth = $('[id$=txtContractTermByMonth]').val() ? getInt($('[id$=txtContractTermByMonth]').val()) : 0;
+            objMData.ValidDate = $('[id$=txtValidDate]').val() ? $('[id$=txtValidDate]').val() : null;
+            objMData.Description = $('[id$=txtDescription]').val();
+            objMData.Active = $("[id=cbActive]").prop('checked');
+            objMData.BuildingKey = $("[id=cboBuilding]").combobox("getValue") ? getInt($("[id=cboBuilding]").combobox("getValue")) : null;
+            objMData.BuildingSectionKey = $("[id=cboBuildingSection]").combobox("getValue") ? getInt($("[id=cboBuildingSection]").combobox("getValue")) : null;
+            objMData.CategoryKey = $("[id=cboCategory]").combobox("getValue") ? getInt($("[id=cboCategory]").combobox("getValue")) : null;
+            return objMData;
+        }
+
+        function getDataDetail() {
+            //Detail
+            let objDData = [];
+            $("[id=dgContractDeclareDetail]").datagrid("acceptChanges");
+            let detailData = $("[id=dgContractDeclareDetail]").datagrid("getData").rows;
+            if (detailData.length > 0) {
+                detailData.forEach(function addDetail(item, index) {
+                    let data = {};
+                    data.ContractDeclareDetailKey = item.ContractDeclareDetailKey ? getInt(item.ContractDeclareDetailKey) : null;
+                    data.ContractDeclareKey = item.ContractDeclareKey ? getInt(item.ContractDeclareKey) : null;
+                    data.DebtReasonKey = item.DebtReasonKey ? getInt(item.DebtReasonKey) : null;
+                    data.Amount = item.Amount ? getFloat(item.Amount) : 0;
+                    data.Description = item.Description;
+                    data.Active = item.Active == 1 ? true : false;
+                    data.DepositMonth = item.DepositMonth ? getFloat(item.DepositMonth) : 0;
+                    data.PenaltyFee = item.PenaltyFee ? getFloat(item.PenaltyFee) : 0;
+                    data.PenaltyFeeAfterDay = item.PenaltyFeeAfterDay ? getFloat(item.PenaltyFeeAfterDay) : 0;
+                    data.IncreaseRentAmount = item.IncreaseRentAmount ? getFloat(item.IncreaseRentAmount) : 0;
+                    data.IncreaseRentPerior = item.IncreaseRentPerior ? getFloat(item.IncreaseRentPerior) : 0;
+                    data.PaymentPeriod = item.PaymentPeriod ? getFloat(item.PaymentPeriod) : 0;
+                    data.PaymentDate = item.PaymentDate ? getFloat(item.PaymentDate) : 0;
+                    objDData.push(data);
+                });
+            }
+
+            return objDData;
+        }
+
+        //====================  Tabs Detail  =====================//
+        function BindingDataToGrid(data) {
+            let toolbar = [
+                {
+                    text: "Thêm",
+                    id: "btnAddDetailGrid",
+                    iconCls: "icon-add",
+                    handler: addnewrow
+                },
+                {
+                    text: "Xóa",
+                    id: "btnDelDetailGrid",
+                    iconCls: "icon-remove",
+                    handler: removeit
+                },
+                {
+                    text: "Lưu tạm",
+                    id: "btnSaveTempDetailGrid",
+                    iconCls: "icon-save",
+                    handler: acceptit
+                },
+                {
+                    text: "Quay lại",
+                    id: "btnUndoDetailGrid",
+                    iconCls: "icon-undo",
+                    handler: rejectit
+                }
+            ];
+            editIndex = undefined;
+
+            $("[id=dgContractDeclareDetail]").datagrid("options").pageNumber = 1;
+            $("[id=dgContractDeclareDetail]").datagrid({ data: [] });
+            $("[id=dgContractDeclareDetail]").datagrid({
+                height: 400,
+                width: "100%",
+                rownumbers: true,
+                toolbar: toolbar,
+                autoRowHeight: true,
+                striped: false,
+                iconCls: "icon-list",
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                singleCheck: false,
+                pagination: false,
+                //loadFilter: pagerFilter,
+                //sortName: "JobSequence",
+                //sortOrder: "asc",
+                data: data,
+                columns: [
+                    [
+                        { field: "ContractDeclareDetailKey", width: 0, hidden: true },
+                        { field: "ContractDeclareKey", width: 0, hidden: true },
+                        {
+                            field: 'DebtReasonKey',
+                            title: 'Loại thu',
+                            width: 200,
+                            formatter: function (value, row) {
+                                return row.DebtReasonName || value;
+                            },
+                            editor: {
+                                type: 'combotree',
+                                options: {
+                                    valueField: 'id',
+                                    textField: 'text',
+                                    icons: [{
+                                        iconCls: 'icon-clear',
+                                        handler: function (e) {
+                                            $(e.data.target).combotree('clear');
+                                        }
+                                    }],
+                                    readonly: false,
+                                    required: true,
+                                    editable: false,
+                                    data: objCombo.cboReasonData,
+                                    validType: "validCombotreeInGrid['[id$=dgContractDeclareDetail]', 'DebtReasonKey']",
+                                    //onBeforeSelect: function (node) {
+                                    //    if (node.isparent) {
+                                    //        return false;
+                                    //    }
+                                    //    return true;
+                                    //}
+                                }
+                            }
+                        },
+                        {
+                            field: 'Amount',
+                            title: 'Tiền phải thu',
+                            formatter: function (value, row) {
+                                return row.Amount !== null ? accounting.formatNumber(row.Amount) : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'DepositMonth',
+                            title: 'Số tháng cọc',
+                            formatter: function (value, row) {
+                                return row.DepositMonth !== null ? accounting.formatNumber(row.DepositMonth, 0, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PenaltyFee',
+                            title: 'Phí phạt (%)',
+                            formatter: function (value, row) {
+                                return row.PenaltyFee !== null ? accounting.formatNumber(row.PenaltyFee, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PenaltyFeeAfterDay',
+                            title: 'Số ngày quá hạn',
+                            formatter: function (value, row) {
+                                return row.PenaltyFeeAfterDay !== null ? accounting.formatNumber(row.PenaltyFeeAfterDay, 0, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'IncreaseRentAmount',
+                            title: '% tăng phí',
+                            formatter: function (value, row) {
+                                return row.IncreaseRentAmount !== null ? accounting.formatNumber(row.IncreaseRentAmount, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'IncreaseRentPerior',
+                            title: 'Kỳ hạn tăng phí (Tháng)',
+                            formatter: function (value, row) {
+                                return row.IncreaseRentPerior !== null ? accounting.formatNumber(row.IncreaseRentPerior, 0, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PaymentPeriod',
+                            title: 'Kỳ thanh toán (số tháng/lần)',
+                            formatter: function (value, row) {
+                                return row.PaymentPeriod !== null ? accounting.formatNumber(row.PaymentPeriod, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'PaymentDate',
+                            title: 'Ngày thanh toán',
+                            formatter: function (value, row) {
+                                return row.PaymentDate !== null ? accounting.formatNumber(row.PaymentDate, 2, ",", ".") : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 2, groupSeparator: ',', min:0, max:31 } }
+                        },
+                        {
+                            field: "Description",
+                            title: "Mô tả",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'Active',
+                            title: "Trạng thái",
+                            width: '15%',
+                            align: 'center',
+                            formatter: function (value, row) {
+                                if (value == 1 || value == true) {
+                                    row.ActiveName = 'Sử dụng';
+                                } else {
+                                    row.ActiveName = 'Không sử dụng';
+                                }
+                                return row.ActiveName;
+                            },
+                            editor: { type: 'checkbox', options: { on: 1, off: 0 } }
+                        }
+                    ]
+                ],
+                onClickCell: function (index, field, value) {
+                    if (endEditing()) {
+                        $("[id=dgContractDeclareDetail]").datagrid("selectRow", index).datagrid("beginEdit", index);
+                        var ed = $("[id=dgContractDeclareDetail]").datagrid("getEditor", { index: index, field: field });
+                        if (ed) {
+                            ($(ed.target).data("textbox") ? $(ed.target).textbox("textbox") : $(ed.target)).focus();
+                        }
+                        editIndex = index;
+                    } else {
+                        setTimeout(function () {
+                            $("[id=dgContractDeclareDetail]").datagrid("selectRow", editIndex);
+                        },
+                            0);
+                    }
+                },
+                onBeginEdit: function (rowIndex, row) {
+                    editIndex = rowIndex;
+                },
+                onEndEdit: function (index, row) {
+                    var active = getInt(row.Active);
+                    row.ActiveName = active == 1 ? "Sử dụng" : "Không sử dụng";
+                    var ed = $(this).datagrid('getEditor',
+                        {
+                            index: index,
+                            field: 'DebtReasonKey'
+                        });
+                    row.DebtReasonName = $(ed.target).combotree('getText');
+                },
+                onAfterEdit: function (index, row) {
+                    //row.editing = true;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onCancelEdit: function (index, row) {
+                    row.editing = false;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onLoadSuccess: function (data) {
+                },
+                onSelect: function (index, row) {
+                },
+                onUnselect: function (index, row) {
+                }
+            });
+        }
+
+        function endEditing() {
+            if (editIndex == undefined) {
+                return true;
+            }
+            if ($("[id=dgContractDeclareDetail]").datagrid("validateRow", editIndex)) {
+                $("[id=dgContractDeclareDetail]").datagrid("endEdit", editIndex);
+                editIndex = undefined;
+                return true;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+        }
+
+        function acceptit() {
+            if (endEditing()) {
+                editIndex = undefined;
+            }
+        }
+
+        function removeit() {
+            if (editIndex !== undefined) {
+                let rowSelected = $("[id=dgContractDeclareDetail]").datagrid("getRows")[editIndex];
+                if (rowSelected.ContractDeclareDetailKey > 0) {
+                    $.messager.confirm(VNMessageR.COMMON_00010,
+                        VNMessageR.COMMON_00014,
+                        function (r) {
+                            if (r) {
+                                CallAjaxDeleteDetail(rowSelected.ContractDeclareDetailKey);
+                            }
+                        });
+                    return false;
+                } else {
+                    toastr.warning(VNMessageR.COMMON_00013);
+                    $("[id=dgContractDeclareDetail]").datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+                    editIndex = undefined;
+                }
+            }
+            return false;
+        }
+
+        function rejectit() {
+            $("[id=dgContractDeclareDetail]").datagrid("rejectChanges");
+            editIndex = undefined;
+        }
+
+        function addnewrow() {
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.remove();
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            if (endEditing()) {
+                let count = $("[id=dgContractDeclareDetail]").datagrid("getRows").length;
+                for (let i = 0; i < count; i++) {
+                    $("[id=dgContractDeclareDetail]").datagrid("refreshRow", i).datagrid("collapseRow", i);
+                }
+
+                $("[id=dgContractDeclareDetail]").datagrid("appendRow",
+                    {
+                        ContractDeclareDetailKey: 0,
+                        ContractDeclareKey: $('[id$=txtContractDeclareKey]').val() || 0,
+                        isAddNewRow: true,
+                    });
+                editIndex = $("[id=dgContractDeclareDetail]").datagrid("getRows").length - 1;
+                $("[id=dgContractDeclareDetail]").datagrid("selectRow", editIndex).datagrid("beginEdit", editIndex);
+
+            }
+            return false;
+        }
+
+        function resetFormData() {
+            $("[id=divCreate]").css("display", "");
+            $("[id=divUpdate]").css("display", "none");
+            $("[id=divDelete]").css("display", "none");
+            $("[id=txtContractDeclareCode]").prop("readonly", false);
+            $("[id=contractModal]").find("input[type=text],input[type=number], textarea").val("");
+            $("[id=contractModal]").find("input[type=checkbox]").prop("checked", true);
+            $('[id$=cboBuilding').combobox('setValue', null);
+            $('[id$=cboBuildingSection').combobox('setValue', null);
+            $('[id$=cboCategory').combobox('setValue', null);
+            //reload datagrid
+            BindingDataToGrid([]);
+        };
+
+        function setFormData(data) {
+            $("[id=divCreate]").css("display", "none");
+            $("[id=divUpdate]").css("display", "");
+            $("[id=divDelete]").css("display", "");
+            //$("[id=txtContractDeclareCode]").prop("readonly", false);
+            $('[id$=txtContractDeclareKey]').val(data.ContractDeclareKey);
+            $('[id$=txtContractDeclareCode]').val(data.ContractDeclareCode);
+            $('[id$=txtContractDeclareName]').val(data.ContractDeclareName);
+            $('[id$=txtContractTermByMonth]').val(data.ContractTermByMonth);
+            $('[id$=txtValidDate]').val(data.ValidDate);
+            $('[id$=txtDescription]').val(data.Description);
+            $("[id$=cbActive]").prop('checked', data.Active);
+            $("[id$=cboBuilding]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuilding').combobox('setValue', data.BuildingKey);
+                }
+            });
+            $("[id$=cboBuildingSection]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuildingSection').combobox('setValue', data.BuildingSectionKey);
+                }
+            });
+            $("[id$=cboCategory]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboCategory').combobox('setValue', data.CategoryKey);
+                }
+            });
+        };
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/ContractDeclare/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    $('#contractModal').modal('hide');
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    $('#contractModal').modal('hide');
+                                    break;
+                            };
+
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblContractDeclare").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDelete(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/ContractDeclare/Delete/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            $('#contractModal').modal('hide');
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblContractDeclare").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDeleteDetail(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/ContractDeclare/DeleteDetail/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            $("[id=dgContractDeclareDetail]").datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+                            editIndex = undefined;
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        //open modal
+        function openCreateNew() {
+            resetFormData();
+            $('#contractModal').modal('show');
+            $('#contractModal').on('shown.bs.modal', function () {
+                BindingDataToGrid([]);
+            });
+        }
+
+        function openEdit(e, id) {
+            resetFormData();
+            onGetByID(id);
+            $('#contractModal').modal('show');
+        }
+
+    </script>
+}

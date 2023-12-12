@@ -1,0 +1,756 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Tổng quan công nợ khách hàng";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearchParams" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Tình trạng</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchStatus" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPage()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table id="dgContract" class="easyui-datagrid table-data" title="DS hợp đồng" style="height: 400px;"></table>
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px; display: none;">
+        <div class="col-12">
+            <table id="dgDebt" class="easyui-datagrid table-data" title="DS công nợ phải thu" style="height: 400px;"></table>
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px;">
+        <div class="col-12">
+            <table id="dgContractDetail" class="easyui-datagrid table-data" title="DS hợp đồng chi tiết" style="height: 400px;"></table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var otherStorage = new OtherStorage();
+        var requiredList = document.getElementsByClassName("entry_required");
+        var PartnerCode = GetURLParameter('partnerCode') != null ? GetURLParameter('partnerCode') : "";
+        var FunctionID = "@Model.FunctionID";
+        var lstContractList = [];
+        var lstDebtList = [];
+        var lstContractDetailList = [];
+        var editIndexC = undefined;
+        var editIndexD = undefined;
+        var editIndexCD = undefined;
+        var cdoSearchModel = {
+            SearchParams: null,
+            Status: null,
+            FunctionID: FunctionID
+        };
+
+        var objCombo = {
+            cboStatusData: [
+                {
+                    Id: "0",
+                    NameCompare: "Chưa thanh toán"
+                }, {
+                    Id: "1",
+                    NameCompare: "Đã thanh toán"
+                }, {
+                    Id: "",
+                    NameCompare: "Tất cả"
+                },
+            ]
+        };
+
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            initComboBox(objCombo.cboStatusData, 'cboSearchStatus', false, 300, false, "0");
+            //onSearchPage();
+            if (PartnerCode != "") {
+                $("#txtSearchParams").val(PartnerCode);
+                onSearchPage();
+            }
+            $("#txtSearchParams").on('keypress', function (e) {
+                if (e.which == 13) {
+                    onSearchPage();
+                }
+            });
+            $.ajaxSettings.async = true;
+        });
+
+        function onSearchPage() {
+            let statusKey = $("#cboSearchStatus").combobox("getValue");
+            cdoSearchModel.SearchParams = $("#txtSearchParams").val()?.trim();
+            cdoSearchModel.Status = statusKey != "" ? parseInt(statusKey) : null;
+
+            if (cdoSearchModel.SearchParams) {
+                lstContractList = getDataFromApiSyncParams("/CustomerDebtOverview/GetContract", FunctionID, cdoSearchModel);
+                lstContractDetailList = getDataFromApiSyncParams("/CustomerDebtOverview/GetContractDetail", FunctionID, cdoSearchModel);
+                //lstDebtList = getDataFromApiSyncParams("/CustomerDebtOverview/GetDebt", FunctionID, cdoSearchModel);
+
+                $.when(lstContractList, lstContractDetailList).done(function (v1, v2) {
+                    BindingDataToGridContract(v1);
+                    BindingDataToGridCD(v2);
+                    //BindingDataToGridDebt(v2);
+                });
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                BindingDataToGridContract([]);
+                BindingDataToGridCD([]);
+                //BindingDataToGridDebt([]);
+            }
+        }
+
+        //====================  Tabs Detail  =====================//
+        function BindingDataToGridContract(data) {
+            editIndexC = undefined;
+            $("[id=dgContract]").datagrid("options").pageNumber = 1;
+            $("[id=dgContract]").datagrid({ data: [] });
+            $("[id=dgContract]").datagrid({
+                height: 400,
+                width: "100%",
+                rownumbers: true,
+                autoRowHeight: true,
+                striped: false,
+                iconCls: "icon-list",
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                singleCheck: false,
+                pagination: false,
+                //loadFilter: pagerFilter,
+                //sortName: "JobSequence",
+                //sortOrder: "asc",
+                data: data,
+                columns: [
+                    [
+                        { field: "ContractKey", width: 0, hidden: true },
+                        { field: "ContractCode", width: 0, hidden: true },
+                        {
+                            field: "ContractName",
+                            title: "Tên HĐ",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        { field: "BuildingID", width: 0, hidden: true },
+                        {
+                            field: "BuildingName",
+                            title: "Tên dự án",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        { field: "DepartmentID", width: 0, hidden: true },
+                        {
+                            field: "DepartmentName",
+                            title: "Tên mặt bằng/ki-ốt",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: "PartnerName",
+                            title: "Tên khách hàng",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: "PartnerPhone",
+                            title: "Số điện thoại",
+                            width: 100,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'DateExpires',
+                            title: 'Hết hạn HĐ',
+                            width: 100,
+                            align: 'center',
+                            editor: {
+                                type: 'datebox',
+                                options: {
+                                    required: false,
+                                    readonly: false,
+                                    formatter: function myformatter(date) {
+                                        var y = date.getFullYear();
+                                        var m = date.getMonth() + 1;
+                                        var d = date.getDate();
+                                        return (d < 10 ? ('0' + d) : d) + '/' + (m < 10 ? ('0' + m) : m) + '/' + y;
+                                    },
+                                    parser: function myparser(s) {
+                                        if (!s) return new Date();
+                                        var ss = (s.split('/'));
+                                        var d = parseInt(ss[0], 10);
+                                        var m = parseInt(ss[1], 10);
+                                        var y = parseInt(ss[2], 10);
+                                        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                                            return new Date(y, m - 1, d);
+                                        } else {
+                                            return new Date();
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    ]
+                ],
+                onClickCell: function (index, field, value) {
+                    //if (endEditingContract()) {
+                    //    $("[id=dgContract]").datagrid("selectRow", index).datagrid("beginEdit", index);
+                    //    var ed = $("[id=dgContract]").datagrid("getEditor", { index: index, field: field });
+                    //    if (ed) {
+                    //        ($(ed.target).data("textbox") ? $(ed.target).textbox("textbox") : $(ed.target)).focus();
+                    //    }
+                    //    editIndexC = index;
+                    //} else {
+                    //    setTimeout(function () {
+                    //        $("[id=dgContract]").datagrid("selectRow", editIndexC);
+                    //    },
+                    //        0);
+                    //}
+                },
+                onBeginEdit: function (rowIndex, row) {
+                },
+                onEndEdit: function (index, row) {
+                },
+                onAfterEdit: function (index, row) {
+                    //row.editing = true;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onCancelEdit: function (index, row) {
+                    row.editing = false;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onLoadSuccess: function (data) {
+                },
+                onSelect: function (index, row) {
+                },
+                onUnselect: function (index, row) {
+                }
+            });
+        }
+
+        function endEditingContract() {
+            if (editIndexC == undefined) {
+                return true;
+            }
+            if ($("[id=dgContract]").datagrid("validateRow", editIndexC)) {
+                $("[id=dgContract]").datagrid("endEdit", editIndexC);
+                editIndexC = undefined;
+                return true;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+        }
+
+        function BindingDataToGridCD(data) {
+            editIndexCD = undefined;
+            let toolbar = [
+                {
+                    text: 'Thêm phiếu thu',
+                    id: "btnAddVoucher",
+                    iconCls: "icon-add",
+                    handler: onCreateVoucherReceipt
+                }
+            ];
+            $("[id=dgContractDetail]").datagrid("options").pageNumber = 1;
+            $("[id=dgContractDetail]").datagrid({ data: [] });
+            $("[id=dgContractDetail]").datagrid({
+                height: 400,
+                width: "100%",
+                rownumbers: true,
+                autoRowHeight: true,
+                toolbar: toolbar,
+                striped: false,
+                iconCls: "icon-list",
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                singleCheck: false,
+                pagination: false,
+                //loadFilter: pagerFilter,
+                //sortName: "JobSequence",
+                //sortOrder: "asc",
+                data: data,
+                columns: [
+                    [
+                        { field: 'ck', checkbox: true },
+                        { field: "ContractKey", width: 0, hidden: true },
+                        { field: "ContractDetailKey", width: 0, hidden: true },
+                        {
+                            field: "ContractCode",
+                            title: "Số HĐ",
+                            width: 100,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: "ContractName",
+                            title: "Tên HĐ",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'DateExpires',
+                            title: 'Hết hạn HĐ',
+                            width: 200,
+                            align: 'center',
+                            editor: {
+                                type: 'datebox',
+                                options: {
+                                    required: false,
+                                    readonly: false,
+                                    formatter: function myformatter(date) {
+                                        var y = date.getFullYear();
+                                        var m = date.getMonth() + 1;
+                                        var d = date.getDate();
+                                        return (d < 10 ? ('0' + d) : d) + '/' + (m < 10 ? ('0' + m) : m) + '/' + y;
+                                    },
+                                    parser: function myparser(s) {
+                                        if (!s) return new Date();
+                                        var ss = (s.split('/'));
+                                        var d = parseInt(ss[0], 10);
+                                        var m = parseInt(ss[1], 10);
+                                        var y = parseInt(ss[2], 10);
+                                        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                                            return new Date(y, m - 1, d);
+                                        } else {
+                                            return new Date();
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            field: 'AnticipatePaymentDate',
+                            title: 'Ngày dự kiến thanh toán',
+                            width: 200,
+                            align: 'center',
+                            editor: {
+                                type: 'datebox',
+                                options: {
+                                    required: false,
+                                    readonly: false,
+                                    formatter: function myformatter(date) {
+                                        var y = date.getFullYear();
+                                        var m = date.getMonth() + 1;
+                                        var d = date.getDate();
+                                        return (d < 10 ? ('0' + d) : d) + '/' + (m < 10 ? ('0' + m) : m) + '/' + y;
+                                    },
+                                    parser: function myparser(s) {
+                                        if (!s) return new Date();
+                                        var ss = (s.split('/'));
+                                        var d = parseInt(ss[0], 10);
+                                        var m = parseInt(ss[1], 10);
+                                        var y = parseInt(ss[2], 10);
+                                        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                                            return new Date(y, m - 1, d);
+                                        } else {
+                                            return new Date();
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        { field: "DebtReasonKey", width: 0, hidden: true },
+                        {
+                            field: "ReasonName",
+                            title: "Lý do thu",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'Amount',
+                            title: 'Số tiền',
+                            formatter: function (value, row) {
+                                return row.Amount !== null ? accounting.formatNumber(row.Amount) : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        },
+                        {
+                            field: "StatusName",
+                            title: "Trạng thái",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'TransDate',
+                            title: 'Ngày phiếu thu',
+                            width: 200,
+                            align: 'center',
+                            editor: {
+                                type: 'datebox',
+                                options: {
+                                    required: false,
+                                    readonly: false,
+                                    formatter: function myformatter(date) {
+                                        var y = date.getFullYear();
+                                        var m = date.getMonth() + 1;
+                                        var d = date.getDate();
+                                        return (d < 10 ? ('0' + d) : d) + '/' + (m < 10 ? ('0' + m) : m) + '/' + y;
+                                    },
+                                    parser: function myparser(s) {
+                                        if (!s) return new Date();
+                                        var ss = (s.split('/'));
+                                        var d = parseInt(ss[0], 10);
+                                        var m = parseInt(ss[1], 10);
+                                        var y = parseInt(ss[2], 10);
+                                        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                                            return new Date(y, m - 1, d);
+                                        } else {
+                                            return new Date();
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            field: "TransNo",
+                            title: "Số phiếu thu",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'DaysLatePayment',
+                            title: 'Số ngày chậm trả',
+                            formatter: function (value, row) {
+                                return row.DaysLatePayment !== null ? accounting.formatNumber(row.DaysLatePayment) : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        }
+                    ]
+                ],
+                onClickCell: function (index, field, value) {
+                    //if (endEditingCD()) {
+                    //    $("[id=dgContractDetail]").datagrid("selectRow", index).datagrid("beginEdit", index);
+                    //    var ed = $("[id=dgContractDetail]").datagrid("getEditor", { index: index, field: field });
+                    //    if (ed) {
+                    //        ($(ed.target).data("textbox") ? $(ed.target).textbox("textbox") : $(ed.target)).focus();
+                    //    }
+                    //    editIndexCD = index;
+                    //} else {
+                    //    setTimeout(function () {
+                    //        $("[id=dgContractDetail]").datagrid("selectRow", editIndexCD);
+                    //    },
+                    //        0);
+                    //}
+                },
+                onBeginEdit: function (rowIndex, row) {
+                },
+                onEndEdit: function (index, row) {
+                },
+                onAfterEdit: function (index, row) {
+                    //row.editing = true;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onCancelEdit: function (index, row) {
+                    row.editing = false;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onLoadSuccess: function (data) {
+                },
+                onSelect: function (index, row) {
+                },
+                onUnselect: function (index, row) {
+                }
+            });
+        }
+
+        function endEditingCD() {
+            if (editIndexCD == undefined) {
+                return true;
+            }
+            if ($("[id=dgContractDetail]").datagrid("validateRow", editIndexCD)) {
+                $("[id=dgContractDetail]").datagrid("endEdit", editIndexCD);
+                editIndexCD = undefined;
+                return true;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+        }
+
+        function BindingDataToGridDebt(data) {
+            editIndexD = undefined;
+            let toolbar = [
+                {
+                    text: 'Thêm phiếu thu',
+                    id: "btnAddVoucher",
+                    iconCls: "icon-add",
+                    handler: dgCreateVoucher
+                }
+            ];
+            $("[id=dgDebt]").datagrid("options").pageNumber = 1;
+            $("[id=dgDebt]").datagrid({ data: [] });
+            $("[id=dgDebt]").datagrid({
+                height: 400,
+                width: "100%",
+                toolbar: toolbar,
+                rownumbers: true,
+                autoRowHeight: true,
+                striped: false,
+                iconCls: "icon-list",
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                singleCheck: false,
+                pagination: false,
+                //loadFilter: pagerFilter,
+                //sortName: "JobSequence",
+                //sortOrder: "asc",
+                data: data,
+                columns: [
+                    [
+                        { field: 'ck', checkbox: true, hidden: false },
+                        { field: "Rowkey", width: 0, hidden: true },
+                        {
+                            field: 'TransDate',
+                            title: 'Ngày phiếu phải thu',
+                            width: 200,
+                            align: 'center',
+                            editor: {
+                                type: 'datebox',
+                                options: {
+                                    required: false,
+                                    readonly: false,
+                                    formatter: function myformatter(date) {
+                                        var y = date.getFullYear();
+                                        var m = date.getMonth() + 1;
+                                        var d = date.getDate();
+                                        return (d < 10 ? ('0' + d) : d) + '/' + (m < 10 ? ('0' + m) : m) + '/' + y;
+                                    },
+                                    parser: function myparser(s) {
+                                        if (!s) return new Date();
+                                        var ss = (s.split('/'));
+                                        var d = parseInt(ss[0], 10);
+                                        var m = parseInt(ss[1], 10);
+                                        var y = parseInt(ss[2], 10);
+                                        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                                            return new Date(y, m - 1, d);
+                                        } else {
+                                            return new Date();
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            field: "TransName",
+                            title: "Loại phiếu thu",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        },
+                        {
+                            field: 'Amount',
+                            title: 'Số tiền',
+                            formatter: function (value, row) {
+                                return row.Amount !== null ? accounting.formatNumber(row.Amount) : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        },
+                        {
+                            field: 'VTransDate',
+                            title: 'Ngày phiếu thu',
+                            width: 200,
+                            align: 'center',
+                            editor: {
+                                type: 'datebox',
+                                options: {
+                                    required: false,
+                                    readonly: false,
+                                    formatter: function myformatter(date) {
+                                        var y = date.getFullYear();
+                                        var m = date.getMonth() + 1;
+                                        var d = date.getDate();
+                                        return (d < 10 ? ('0' + d) : d) + '/' + (m < 10 ? ('0' + m) : m) + '/' + y;
+                                    },
+                                    parser: function myparser(s) {
+                                        if (!s) return new Date();
+                                        var ss = (s.split('/'));
+                                        var d = parseInt(ss[0], 10);
+                                        var m = parseInt(ss[1], 10);
+                                        var y = parseInt(ss[2], 10);
+                                        if (!isNaN(y) && !isNaN(m) && !isNaN(d)) {
+                                            return new Date(y, m - 1, d);
+                                        } else {
+                                            return new Date();
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            field: 'DaysLate',
+                            title: 'Số ngày trả chậm',
+                            formatter: function (value, row) {
+                                return row.DaysLate !== null ? accounting.formatNumber(row.DaysLate) : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: true, precision: 0, groupSeparator: ',' } }
+                        }
+                    ]
+                ],
+                onClickCell: function (index, field, value) {
+                    //if (endEditingDebt()) {
+                    //    $("[id=dgDebt]").datagrid("selectRow", index).datagrid("beginEdit", index);
+                    //    var ed = $("[id=dgDebt]").datagrid("getEditor", { index: index, field: field });
+                    //    if (ed) {
+                    //        ($(ed.target).data("textbox") ? $(ed.target).textbox("textbox") : $(ed.target)).focus();
+                    //    }
+                    //    editIndexD = index;
+                    //} else {
+                    //    setTimeout(function () {
+                    //        $("[id=dgDebt]").datagrid("selectRow", editIndexD);
+                    //    },
+                    //        0);
+                    //}
+                },
+                onBeginEdit: function (rowIndex, row) {
+                },
+                onEndEdit: function (index, row) {
+                },
+                onAfterEdit: function (index, row) {
+                    //row.editing = true;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onCancelEdit: function (index, row) {
+                    row.editing = false;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onLoadSuccess: function (data) {
+                },
+                onSelect: function (index, row) {
+                },
+                onUnselect: function (index, row) {
+                }
+            });
+        }
+
+        function endEditingDebt() {
+            if (editIndexD == undefined) {
+                return true;
+            }
+            if ($("[id=dgDebt]").datagrid("validateRow", editIndexD)) {
+                $("[id=dgDebt]").datagrid("endEdit", editIndexD);
+                editIndexD = undefined;
+                return true;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+        }
+
+        function onCreateVoucherReceipt() {
+            if (endEditingCD()) {
+                var dgContractDetailData = $('#dgContractDetail').datagrid('getChecked');
+            }
+            if (dgContractDetailData.length > 0) {
+                var rowKeys = [];
+                dgContractDetailData.forEach(el => {
+                    rowKeys.push(el.ContractDetailKey);
+                });
+
+                var key = Math.floor((Math.random() * 1000000000) + 1);
+                otherStorage.set(key, rowKeys.toString());
+                OpenUrlDetail(27, null, null, false, `&isKey=CDO&otherStorage=${key}`);
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function dgCreateVoucher() {
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        if (endEditingDebt()) {
+                            var dgContractDetailData = $('#dgContractDetail').datagrid('getChecked');
+                        }
+                        if (dgContractDetailData.length > 0) {
+                            var rowKeys = [];
+                            dgContractDetailData.forEach(el => {
+                                rowKeys.push(el.Rowkey);
+                            });
+                            var objData = {
+                                RowKeys: rowKeys,
+                                FunctionID: FunctionID
+                            };
+                            ajaxindicatorstart(VNMessageR.COMMON_00011);
+                            $.ajax({
+                                type: "POST",
+                                url: "/CustomerDebtOverview/CreateVoucher",
+                                headers: { 'FunctionID': FunctionID },
+                                dataType: "json",
+                                contentType: "application/json;",
+                                data: JSON.stringify(objData),
+                                success: function (msg) {
+                                    if (msg.Success) {
+                                        toastr.success(VNMessageR.COMMON_00002);
+                                    } else {
+                                        ToastrErr(msg);
+                                    }
+                                    ajaxindicatorstop();
+                                },
+                                error: function (err) {
+                                    ToastrException(err);
+                                    ajaxindicatorstop();
+                                }
+                            });
+                        } else {
+                            toastr.warning(VNMessageR.COMMON_00013);
+                        }
+                    }
+                });
+            return false;
+        }
+    </script>
+}

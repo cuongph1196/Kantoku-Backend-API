@@ -1,0 +1,136 @@
+﻿@using System.Globalization
+@model QLKTX.Models.ContractVViewModel;
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HĐ Thuê Sạp Chợ</title>
+    <!-- CSS -->
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <!-- Google Font: Source Sans Pro -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700&display=fallback">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="~/plugins/fontawesome-free/css/all.min.css">
+    <!-- Ionicons -->
+    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
+    <!-- Bootstrap Color Picker -->
+    <link rel="stylesheet" href="~/plugins/bootstrap-colorpicker/css/bootstrap-colorpicker.min.css">
+    <!-- iCheck -->
+    <link rel="stylesheet" href="~/plugins/icheck-bootstrap/icheck-bootstrap.min.css">
+    <!-- Toastr -->
+    <link rel="stylesheet" href="~/plugins/toastr/toastr.min.css">
+    <style type="text/css">
+        body {
+            margin: 1% 5%;
+        }
+
+        @@media print {
+            thead, tfoot {
+                display: none !important
+            }
+        }
+    </style>
+</head>
+<body class="" id="printCtrl">
+    <!-- jQuery -->
+    <script src="~/plugins/jquery/jquery.min.js"></script>
+    <!-- Bootstrap 4 -->
+    <script src="~/plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <!-- jquery-easyui -->
+    <script type="text/javascript" src="~/assets/easy-ui/jquery-easyui/jquery.easyui.min.js"></script>
+    <!-- Toastr -->
+    <script src="~/plugins/toastr/toastr.min.js"></script>
+    <!-- customs -->
+    <script src="~/js/commonEM.js" asp-append-version="true"></script>
+    <script src="~/js/messageResources.js" asp-append-version="true"></script>
+    
+    <script type="text/javascript">
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+        let contractKey = @Model.ContractKey ? getInt(@Model.ContractKey) : 0;
+
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            onGetContractView(contractKey);
+            window.onafterprint = function () { setTimeout(function () { window.close(); }, 500); }
+            $.ajaxSettings.async = true;
+        });
+
+        function onGetBindingContractView(contractKey) {
+            if (contractKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/Contract/GetBindingContractView/" + contractKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        if (result.Success) {
+                            $("#printCtrl").append(result.Data?.ContractView);
+                            setTimeout(function () {
+                                window.print();
+                            }, 1000);
+                        }
+                        else{
+                            toastr.error(result.Message);
+                            setTimeout(function () {
+                                window.close();
+                            }, 1500);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        toastr.error(err);
+                        //ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                toastr.error(VNMessageR.COMMON_00006);
+            }
+        }
+        
+        function onGetContractView(contractKey) {
+            if (contractKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/Contract/GetContractView/" + contractKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    success: function (result) {
+                        
+                        if (result.Success) {
+                            $("#printCtrl").append(result.Data?.ContractView);
+                            setTimeout(function () {
+                                window.print();
+                            }, 1000);
+                        }
+                        else{
+                            onGetBindingContractView(contractKey);
+                            //toastr.error(result.Message);
+                            //setTimeout(function () {
+                            //    window.close();
+                            //}, 1500);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        
+                        toastr.error(err);
+                        //ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                toastr.error(VNMessageR.COMMON_00006);
+            }
+        }
+    </script>
+</body>
+</html>

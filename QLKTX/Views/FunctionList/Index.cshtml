@@ -1,0 +1,460 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = "Quản lý chức năng";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    <button type="button" class="btn btn-sm btn-success" onclick="openCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS Nhóm người dùng</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblFunctionList" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Tên chức năng</th>
+                                <th>Phân hệ</th>
+                                <th>Đường dẫn</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="funcModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Thêm/Cập nhật</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Tên chức năng</label>
+                            <input type="text" id="txtFunctionName" class="form-control form-control-sm entry_required" autocomplete="off" />
+                            <input type="hidden" id="txtID" class="form-control form-control-sm" autocomplete="off" readonly />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Phân hệ</label>
+                            <div class="">
+                                <input type="text" id="cboModuleID" class="easyui-combobox entry_required" autocomplete="off" />
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Đường dẫn</label>
+                            <input type="text" id="txtUrl" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Phân cấp</label>
+                            <input type="number" id="txtRank" class="form-control form-control-sm entry_required" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Icons</label>
+                            <input type="text" id="txtIcons" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group">
+                            <label for="inputName">Mã chứng từ</label>
+                            <input type="text" id="txtTransID" class="form-control form-control-sm" autocomplete="off" />
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbDisplay">
+                            <label class="form-check-label" for="cbDisplay">Hiển thị</label>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="form-group form-check m-t35" style="padding-left: 1.5rem;">
+                            <input type="checkbox" class="form-check-input" id="cbIsPopup">
+                            <label class="form-check-label" for="cbIsPopup">IsPopup</label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Đóng</button>
+                <div id="divCreate" class="form-group">
+                    <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+                </div>
+                <div id="divUpdate" class="form-group" style="display:none;">
+                    <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var lstFunctionList = [];
+        var funcSearchModel = {
+            SearchParams: null
+        };
+        var objCombo = {
+            cboModuleData: []
+        };
+        $(document).ready(async function () {
+            $.ajaxSettings.async = false;
+            initCombo();
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboModuleData = getDataCombobox(ProjectCF.configs.baseApi + "/Common/combobox/module");
+            initComboBox(objCombo.cboModuleData, 'cboModuleID', false, 300);
+
+            $.ajaxSettings.async = true;
+        }
+
+        function onSearchPaging() {
+            funcSearchModel.SearchParams = $("[id=txtSearch]").val().trim();
+            BindingDataTableFL();
+        }
+
+        function BindingDataTableFL() {
+            $("#tblFunctionList").DataTable().destroy();
+            $("#tblFunctionList tbody").empty(); // empty tbody
+            $("#tblFunctionList").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/FunctionList/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.SearchParams = funcSearchModel.SearchParams;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        lstFunctionList = json.data;
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "FunctionName", "sortable": true },
+                    { "data": "ModuleName", "sortable": false },
+                    { "data": "Url", "sortable": false },
+                    {
+                        "data": "Display", "sortable": false,
+                        "className": "text-center",
+                        "width": 150,
+                        "render": function (data, type, full, meta) {
+                            return full.Display
+                                ? `<span class="label label-sm label-info-bt arrowed arrowed-righ">Hiển thị</span>`
+                                : `<span class="label label-sm label-danger arrowed arrowed-righ">Không hiển thị</span>`;
+                        }
+                    },
+                    {
+                        "className": "text-center project-actions text-right",
+                        "sortable": false,
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            var actionStr = "";
+                            if (full.ID) {
+                                actionStr = `<button class="btn btn-info btn-xs" onclick = "openEdit(event, '${full.ID}')"> <i class="fas fa-pencil-alt"> </i> Sửa </button>&nbsp;`;
+                                actionStr += `<button class="btn btn-danger btn-xs" onclick = "onDelete(event, '${full.ID}')" @(Model.FUPermiss.FDel ? "" : "disabled")> <i class="fas fa-trash"> </i> Xóa </button>&nbsp;`;
+                            }
+                            return actionStr;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            FunctionName: $("[id=txtFunctionName]").val(),
+                            ModuleID: $("[id=cboModuleID]").combobox("getValue"),
+                            Url: $("[id=txtUrl]").val(),
+                            Rank: $("[id=txtRank]").val(),
+                            Display: $("[id=cbDisplay]").prop("checked"),
+                            IsPopup: $("[id=cbIsPopup]").prop("checked"),
+                            Icons: $("[id=txtIcons]").val(),
+                            TransID: $("[id=txtTransID]").val(),
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            ID: $("[id=txtID]").val(),
+                            FunctionName: $("[id=txtFunctionName]").val(),
+                            ModuleID: $("[id=cboModuleID]").combobox("getValue"),
+                            Url: $("[id=txtUrl]").val(),
+                            Rank: $("[id=txtRank]").val(),
+                            Display: $("[id=cbDisplay]").prop("checked"),
+                            IsPopup: $("[id=cbIsPopup]").prop("checked"),
+                            Icons: $("[id=txtIcons]").val(),
+                            TransID: $("[id=txtTransID]").val(),
+                        };
+                        CallAjaxSave("Update", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function resetFormData() {
+            $("[id=divCreate]").css("display", "");
+            $("[id=divUpdate]").css("display", "none");
+            $("[id=txtID]").prop("readonly", true);
+            $("[id=funcModal]").find("input[type=text],input[type=number], textarea").val("");
+            $('[id$=cboModuleID').combobox('setValue', null);
+            $('[id$=cbDisplay').prop("checked", true);
+            $('[id$=cbIsPopup').prop("checked", false);
+        };
+
+        function setFormData(data) {
+            $("[id=divCreate]").css("display", "none");
+            $("[id=divUpdate]").css("display", "");
+            $('[id$=txtID]').val(data.ID);
+            $('[id$=txtFunctionName]').val(data.FunctionName);
+            $('[id$=txtUrl]').val(data.Url);
+            $('[id$=txtRank]').val(data.Rank);
+            $("[id$=txtIcons]").val(data.Icons);
+            $("[id$=txtTransID]").val(data.TransID);
+            $("[id$=cbDisplay]").prop('checked', data.Display);
+            $("[id$=cbIsPopup]").prop('checked', data.IsPopup);
+            $("[id$=cboModuleID]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboModuleID').combobox('setValue', data.ModuleID);
+                }
+            });
+        };
+
+        function onDelete(e, id) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            CallAjaxDelete(id);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/FunctionList/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    $('#funcModal').modal('hide');
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    $('#funcModal').modal('hide');
+                                    break;
+                            };
+
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblFunctionList").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDelete(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/FunctionList/Delete/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        ajaxindicatorstop();
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            setTimeout(function () {
+                                initCombo();
+                                //reload current page
+                                $("#tblFunctionList").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        //open modal
+        function openCreateNew() {
+            resetFormData();
+            $('#funcModal').modal('show');
+        }
+
+        function openEdit(e, id) {
+            resetFormData();
+            var data = lstFunctionList.find(x => x.ID == id);
+            setFormData(data);
+            $('#funcModal').modal('show');
+        }
+
+    </script>
+}

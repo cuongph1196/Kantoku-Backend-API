@@ -1,0 +1,265 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Khai báo hợp đồng";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm:</label>
+                                <input type="text" id="txtSearch" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Dự án</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuilding" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Khu vực</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuildingSection" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                    @*<button type="button" class="btn btn-sm btn-success" data-toggle="modal" onclick="javascript: openCreateNew(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-plus"></i> Thêm mới</button>*@
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS khai báo HĐ</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblContract" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã HĐ</th>
+                                <th>Tên HĐ</th>
+                                <th>Mô tả</th>
+                                <th>Trạng thái</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined, editIndexCTDL = undefined;
+        var FunctionID = "@Model.FunctionID";
+        var lstDetailDeclare = [];
+        var flagChangeDeclare = false;
+        var searchModel = {
+            SearchParams: null,
+            BuildingKey: null,
+            BuildingSectionKey: null,
+        };
+        var objCombo = {
+            cboContractDeclareData: [],
+            cboBuildingData: [],
+            cboBuildingSectionData: [],
+            cboCategoryData: [],
+            cboDepartmentData: [],
+            cboPartnerData: [],
+            cboReasonData: []
+        };
+        var objDataEntry = {
+            objContract: {},
+            arrCDetails: []
+        };
+        $(document).ready(async function () {
+            //init upload file
+            bsCustomFileInput.init();
+            $.ajaxSettings.async = false;
+            initCombo();
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', false, 300, true);
+            $("[id=cboSearchBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboSearchBuildingSection', false, 300, true);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboSearchBuildingSection', false, 300, true);
+                }
+            });
+        }
+
+        function onSearchPaging() {
+            searchModel.SearchParams = $("[id=txtSearch]").val()?.trim();
+            searchModel.BuildingKey = $("[id=cboSearchBuilding]").combobox("getValue");
+            searchModel.BuildingSectionKey = $("[id=cboSearchBuildingSection]").combobox("getValue");
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblContract").DataTable().destroy();
+            $("#tblContract tbody").empty(); // empty tbody
+            $("#tblContract").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/ApprovedContract/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.SearchParams = searchModel.SearchParams;
+                        dataSearch.BuildingKey = searchModel.BuildingKey;
+                        dataSearch.BuildingSectionKey = searchModel.BuildingSectionKey;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "ContractCode", "sortable": true },
+                    { "data": "ContractName", "sortable": true },
+                    { "data": "Description", "sortable": false },
+                    {
+                        "data": "Status", "sortable": false,
+                        "className": "text-center",
+                        "width": 150,
+                        "render": function (data, type, full, meta) {
+                            return full.Status
+                                ? `<span class="label label-sm label-info-bt arrowed arrowed-righ">Đã duyệt</span>`
+                                : `<span class="label label-sm label-danger arrowed arrowed-righ">Chưa duyệt</span>`;
+                        }
+                    },
+                    {
+                        "className": "text-center project-actions text-right",
+                        "sortable": false,
+                        "width": 200,
+                        "render": function (data, type, full, meta) {
+                            var actionStr = "";
+                            if (full.ContractKey) {
+                                actionStr = `<button class="btn btn-info btn-xs" onclick = "openEdit(event, '${full.ContractKey}')"> <i class="fas fa-pencil-alt"> </i> Sửa </button>&nbsp;`;
+                                //actionStr += `<button class="btn btn-danger btn-xs" onclick = "onDelete(event, '${full.ContractKey}')"> <i class="fas fa-trash"> </i> Xóa </button>&nbsp;`;
+                                //actionStr += `<button class="btn btn-success btn-xs" onclick="onPreviewPrint(event, '${full.ContractKey}')"> <i class="fas fa-eye"> </i> Xem HĐ </button>&nbsp;`;
+                                actionStr += `<a type="button" class="btn btn-success btn-xs" onclick="onPreviewPrint(event, '${full.ContractKey}')"><i class="fas fa-eye"></i> Xem HĐ</a>&nbsp;`;
+                                actionStr += `<a type="button" class="btn btn-warning btn-xs" method="get" href="/ApprovedContract/ContractEdit?ModuleID=${@Model.ModuleID}&FunctionID=${@Model.FunctionID}&ContractKey=${full.ContractKey}"><i class="fas fa-edit"></i> Sửa HĐ</a>&nbsp;`;
+                            }
+                            return actionStr;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        //open modal
+        //function openCreateNew() {
+        //    resetFormData();
+        //    resetFormDatabyDeclare();
+        //    $('#contractModal').modal('show');
+        //    $('#contractModal').on('shown.bs.modal', function () {
+        //        BindingDataToGrid([]);
+        //    });
+        //}
+
+        //function openEdit(e, id) {
+        //    resetFormData();
+        //    resetFormDatabyDeclare();
+        //    onGetByID(id);
+        //    $('#contractModal').modal('show');
+        //}
+
+
+        //open modal
+        function openCreateNew(e) {
+            OpenUrlDetail(54, 0, true);
+        }
+
+        function openEdit(e, id) {
+            OpenUrlDetail(54, id, false);
+        }
+
+        function onPreviewPrint(e, contractKey) {
+            let url = `/ApprovedContract/ContractView?ModuleID=${@Model.ModuleID}&FunctionID=${@Model.FunctionID}&ContractKey=${contractKey}`;
+            window.open(url);
+        }
+
+    </script>
+}

@@ -1,0 +1,285 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Thống kê phiếu chi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Từ ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateFrom" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Đến ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateTo" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        @*<div class="col-4">
+                        <div class="form-group">
+                        <label for="inputName">Dự án</label>
+                        <div class="">
+                        <input type="text" id="cboSearchBuilding" class="easyui-combobox entry_required" autocomplete="off" />
+                        </div>
+                        </div>
+                        </div>*@
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Chi tiết thu chi</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblVoucherDetail" class="table table-bordered table-hover projects display nowrap">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Số chứng từ</th>
+                                <th>Ngày hóa đơn</th>
+                                <th>Số hóa đơn</th>
+                                <th>Họ tên</th>
+                                <th>Đơn vị</th>
+                                <th>Địa chỉ</th>
+                                <th>MST</th>
+                                <th>Hạn nợ</th>
+                                <th>Lý do</th>
+                                <th>Nội dung</th>
+                                <th>TK nợ</th>
+                                <th>Mã TK nợ</th>
+                                <th>Tên TK nợ</th>
+                                <th>TK có</th>
+                                <th>Mã TK có</th>
+                                <th>Tên TK có</th>
+                                <th>Kho</th>
+                                <th>Thành tiền</th>
+                                <th>Tỷ lệ thuế</th>
+                                <th>Tổng hóa đơn</th>
+                                <th>Ghi chú</th>
+                                <th>Khế ước</th>
+                                <th>Hợp đồng</th>
+                                <th>Dự án</th>
+                                <th>KM phí</th>
+                                <th>Tính chất thu</th>
+                                <th>Tính chất chi</th>
+                                <th>Trạng thái</th>
+                                <th>Mã định khoản</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+
+        var searchModel = {
+            DateFrom: null,
+            DateTo: null,
+            BuildingKey: null,
+            RenderType: null,
+            FunctionID: FunctionID
+        };
+
+        var objCombo = {
+            cboBuildingData: []
+        };
+
+        $(document).ready(async function () {
+            var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+            var lastDay = moment().endOf('month').format('DD/MM/YYYY');
+            $('#txtSearchDateFrom').val(firstDay);
+            $('#txtSearchDateTo').val(lastDay);
+            $.ajaxSettings.async = false;
+            //objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            //initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', true, 300);
+            //
+            BindingDataTable([]);
+            $.ajaxSettings.async = true;
+        });
+
+        function onSearchPaging() {
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            searchModel.DateFrom = moment($("[id$=txtSearchDateFrom]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.DateTo = moment($("[id$=txtSearchDateTo]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            //searchModel.BuildingKey = $("[id=cboSearchBuilding]").combobox("getValue");
+
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblVoucherDetail").DataTable().destroy();
+            $("#tblVoucherDetail tbody").empty(); // empty tbody
+            $("#tblVoucherDetail").DataTable({
+                scrollX: true,
+                bAutoWidth: true,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                dom: 'Bfrtip',
+                buttons: [
+                    {
+                        text: 'Excel',
+                        action: function (e, dt, node, config) {
+                            onExportFile("Excel");
+                        }
+                        //}, {
+                        //    text: 'Pdf',
+                        //    action: function (e, dt, node, config) {
+                        //        onExportFile("Pdf");
+                        //    }
+                        //}, {
+                        //    text: 'Word',
+                        //    action: function (e, dt, node, config) {
+                        //        onExportFile("Word");
+                        //    }
+                    },
+                ],
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/StatisticsOfPaymentsReport/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.FromDate = searchModel.DateFrom;
+                        dataSearch.ToDate = searchModel.DateTo;
+                        //dataSearch.BuildingKey = searchModel.BuildingKey;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "TransNo", "className": "text-center", "sortable": false },
+                    { "data": "OldTransDate", "className": "text-center", "sortable": false },
+                    { "data": "OldTransNo", "className": "text-center", "sortable": false },
+                    { "data": "PartnerName", "className": "text-center", "sortable": false },
+                    { "data": "PartnerTaxName", "className": "text-left", "sortable": false },
+                    { "data": "PartnerTaxAddress", "className": "text-left", "sortable": false },
+                    { "data": "PartnerTaxNumber", "className": "text-center", "sortable": false },
+                    { "data": "DebtTerm", "className": "text-center", "sortable": false },
+                    { "data": "ReasonName", "className": "text-center", "sortable": false },
+                    { "data": "Description", "className": "text-left", "sortable": false },
+                    { "data": "DebitAccount", "className": "text-center", "sortable": false },
+                    { "data": "DebitAccountKey", "className": "text-center", "sortable": false },
+                    { "data": "DebitAccountName", "className": "text-center", "sortable": false },
+                    { "data": "CreditAccount", "className": "text-center", "sortable": false },
+                    { "data": "CreditAccountKey", "className": "text-center", "sortable": false },
+                    { "data": "CreditAccountName", "className": "text-center", "sortable": false },
+                    { "data": "Warehouse", "className": "text-center", "sortable": false },
+                    {
+                        "data": "Amount", "sortable": false,
+                        "className": "text-right",
+                        "render": function (data, type, full, meta) {
+                            return full.Amount != null ? accounting.formatNumber(full.Amount) : 0;
+                        }
+                    },
+                    { "data": "TaxRate", "className": "text-left", "sortable": false },
+                    { "data": "SumAmount", "className": "text-left", "sortable": false },
+                    { "data": "Notes", "className": "text-left", "sortable": false },
+                    { "data": "Indenture", "className": "text-left", "sortable": false },
+                    { "data": "ContractKey", "className": "text-left", "sortable": false },
+                    { "data": "BuildingName", "className": "text-left", "sortable": false },
+                    { "data": "SaleFee", "className": "text-left", "sortable": false },
+                    { "data": "InNature", "className": "text-left", "sortable": false },
+                    { "data": "OutNature", "className": "text-left", "sortable": false },
+                    { "data": "StatusName", "className": "text-left", "sortable": false },
+                    { "data": "DinhKhoanID", "className": "text-left", "sortable": false }
+                ],
+                "aaSorting": [[1, "asc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function onExportFile(renderType) {
+            searchModel.RenderType = renderType;
+            //var result = getDataFromApiSyncParams("/SummaryVoucherReport/SearchReport", FunctionID, null);
+            window.open(`/StatisticsOfPaymentsReport/SearchReport?FromDate=${searchModel.DateFrom}&ToDate=${searchModel.DateTo}&RenderType=${searchModel.RenderType}`, target = "_blank");
+
+        }
+
+    </script>
+}

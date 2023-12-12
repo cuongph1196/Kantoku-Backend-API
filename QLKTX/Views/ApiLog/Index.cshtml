@@ -1,0 +1,423 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Log hệ thống";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Từ ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtDateFrom" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Đến ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtDateTo" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Giao thức</label>
+                                <div class="">
+                                    <input type="text" id="cboMethod" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Người tạo</label>
+                                <div class="">
+                                    <input type="text" id="cboUserAccount" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Tìm kiếm</label>
+                                <input type="text" id="txtSearchParams" class="form-control form-control-sm" autocomplete="off">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()"><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">DS Logs</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblLogList" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Thời gian</th>
+                                <th>Host</th>
+                                <th>Giao thức</th>
+                                <th>Đường dẫn</th>
+                                <th>Người tạo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="logModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-info">
+                <h5 class="modal-title">Chi tiết</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <p style="word-wrap: break-word;"><b>Path: </b><span id="path"></span></p>
+                        <p style="word-wrap: break-word;"><b>Query: </b><span id="query"></span></p>
+                        <p><b>Method: </b><span id="method"></span></p>
+                        <p><b>Host: </b><span id="host"></span></p>
+                        <p style="word-wrap: break-word;"><b>Time Stamp: </b><span id="time"></span></p>
+                        <p><b>RequestBy: </b><span id="requestBy"></span></p>
+                    </div>
+                    <div class="col-md-12">
+                        <p><b>RequestBody: </b></p>
+                        <div id="divContents" title="Raw Data" style="border: 1px solid #ddd; text-align: left; padding: 5px; overflow: hidden; overflow-wrap: break-word;">
+                        </div>
+                        <div class="table-body col-md-12 m-tb10">
+                            <table class="table table-bordered table-hover table-data no-footer dataTable" id="tblLogDetails" title="Format Data">
+                            </table>
+                            <div class="force-overflow"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<!-- /.modal -->
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var lstSystemLog = [];
+        var objCombo = {
+            cboMethodData: [
+                {
+                    Id: 'GET',
+                    NameCompare: 'Lấy dữ liệu'
+                },
+                {
+                    Id: 'POST',
+                    NameCompare: 'Thêm mới'
+                },
+                {
+                    Id: 'PUT',
+                    NameCompare: 'Cập nhật'
+                },
+                //{
+                //    Id: 'PATCH',
+                //    NameCompare: 'Sửa'
+                //},
+                {
+                    Id: 'DELETE',
+                    NameCompare: 'Xóa'
+                }
+            ],
+            cboUserAccountData: []
+        };
+
+        var logSearchModel = {
+            TimeUtcFrom: null,
+            TimeUtcTo: null,
+            RequestedMethod: null,
+            AccountLogin: null,
+            SearchParams: null
+        };
+
+        $(document).ready(async function () {
+            var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+            var lastDay = moment().endOf('month').format('DD/MM/YYYY');
+            $('#txtDateFrom').val(firstDay);
+            $('#txtDateTo').val(lastDay);
+            $.ajaxSettings.async = false;
+            initCombo();
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            initComboBox(objCombo.cboMethodData, 'cboMethod', false, 300);
+            objCombo.cboUserAccountData = getDataCombobox(ProjectCF.configs.baseApi + "/Common/combobox/useraccount?active=1");
+            initComboBox(objCombo.cboUserAccountData, 'cboUserAccount', false, 300);
+            $.ajaxSettings.async = true;
+        }
+
+        function onSearchPaging() {
+            logSearchModel.TimeUtcFrom = moment($("[id$=txtDateFrom]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            logSearchModel.TimeUtcTo = moment($("[id$=txtDateTo]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            logSearchModel.RequestedMethod = $("[id=cboMethod]").val();
+            logSearchModel.AccountLogin = $("[id=cboUserAccount]").val();
+            logSearchModel.SearchParams = $("[id=txtSearchParams]").val()?.trim();
+            BindingDataTableLogging();
+        }
+
+        function BindingDataTableLogging() {
+            $("#tblLogList").DataTable().destroy();
+            $("#tblLogList tbody").empty(); // empty tbody
+            $("#tblLogList").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/ApiLog/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.TimeUtcFrom = logSearchModel.TimeUtcFrom;
+                        dataSearch.TimeUtcTo = logSearchModel.TimeUtcTo;
+                        dataSearch.RequestedMethod = logSearchModel.RequestedMethod;
+                        dataSearch.UserID = logSearchModel.AccountLogin;
+                        dataSearch.SearchParams = logSearchModel.SearchParams;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        lstSystemLog = json.data;
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    {
+                        "data": "TimeUtc", "sortable": true, "width": 150,
+                        "render": function (data, type, row, meta) {
+                            return moment(data).format("DD/MM/YYYY HH:mm:ss");
+                        }
+                    },
+                    { "data": "Host", "sortable": false, "width": 200 },
+                    {
+                        "data": "RequestedMethod", "sortable": false, "width": 100,
+                        "render": function (data, type, full, meta) {
+                            switch (full.RequestedMethod) {
+                                case "GET": return "Lấy dữ liệu";
+                                case "POST": return "Thêm mới";
+                                case "PUT": return "Cập nhật";
+                                case "DELETE": return "Xóa";
+                            }
+                        }
+                    },
+                    { "data": "AbsoluteUri", "sortable": false, "width": 200 },
+                    { "data": "AccountLogin", "sortable": false, "width": 100 },
+                    {
+                        "className": "text-center project-actions text-right",
+                        "sortable": false,
+                        "width": 150,
+                        "render": function (data, type, full, meta) {
+                            var actionStr = "";
+                            if (full.LogID) {
+                                actionStr = `<button class="btn btn-info btn-xs" onclick = "openView(event, '${full.LogID}')"> <i class="fas fa-eye"> </i> Xem </button>&nbsp;`;
+                            }
+                            return actionStr;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "desc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function openView(e, id) {
+            e.preventDefault();
+            if (id) {
+                var data = lstSystemLog.find(x => x.LogID == id);
+                $('#path').text(data.AbsoluteUri);
+                $('#query').text(data.AbsoluteUri.split('?')[1] || "");
+                $('#method').text(data.RequestedMethod);
+                $('#host').text(data.Host);
+                $('#time').text(moment(data.TimeUtc).format('DD/MM/YYYY HH:mm:ss.SSS'));
+                $('#requestBy').text(data.AccountLogin);
+
+                var requestBody = removeXMLInvalidChars(data.RequestBody);
+                document.getElementById("divContents").innerHTML = "";
+                document.getElementById("divContents").innerHTML = requestBody;
+                //var dataReplace = requestBody.replace("%2F", "/");
+                //dataReplace = dataReplace.slice(1);
+                //dataReplace = dataReplace
+                //    .slice(0, dataReplace.length - 1);
+                //var getDataArray = dataReplace.split(',');
+
+                //if (!stringIsArray(getDataArray)) {
+                //var logDetail = `<thead> <tr><th style="width: 50%;">Key</th><th style="width: 50%;">Value</th></tr></thead>`;
+                //for (var i = 0; i < getDataArray.length; i++) {
+                //    if (getDataArray[i] !== "") {
+                //        let key = getDataArray[i].split(":")[0];
+                //        let value = getDataArray[i].split(":")[1];
+                //        logDetail += `<tr><td style="width: 50%;">${key}</td><td style="width: 50%;">${value}</td></tr>`;
+                //    }
+                //}
+                //document.getElementById("divContents").innerHTML = "";
+                //document.getElementById("divContents").innerHTML = requestBody;
+                //$("#tblLogDetails").empty();
+                //$("#tblLogDetails").append(logDetail);
+                //}
+                //else {
+                //Check is json
+                //let data = JSON.parse(getDataArray);
+                //if (data && data.length > 0) {
+                //    logDetail = `<thead> <tr><th style="width: 50%;">Key</th><th style="width: 50%;">Value</th></tr></thead>`;
+                //    for (var i = 0; i < data.length; i++) {
+                //        if (data[i] !== "") {
+                //            let key = "";
+                //            let value = JSON.stringify(data[i]);
+                //            logDetail += `<tr><td style="width: 50%;">${key}</td><td style="width: 50%;">${value}</td></tr>`;
+                //        }
+                //    }
+                //    document.getElementById("divContents").innerHTML = "";
+                //    document.getElementById("divContents").innerHTML = requestBody;
+                //    $("#tblLogDetails").empty();
+                //    //$("#tblLogDetails").append(logDetail);
+                //}
+                //else {
+                //    document.getElementById("divContents").innerHTML = "";
+                //    document.getElementById("divContents").innerHTML = getDataArray;
+                //    $("#tblLogDetails").empty();
+                //}
+                //}
+            } else {
+
+                //Check is json
+                //let data = JSON.parse(getDataArray);
+                //if (data && data.length > 0) {
+                //logDetail = `<thead> <tr><th style="width: 50%;">Key</th><th style="width: 50%;">Value</th></tr></thead>`;
+                //for (var i = 0; i < data.length; i++) {
+                //    if (data[i] !== "") {
+                //        let key = "";
+                //        let value = JSON.stringify(data[i]);
+                //        logDetail += `<tr><td style="width: 50%;">${key}</td><td style="width: 50%;">${value}</td></tr>`;
+                //    }
+                //}
+                //document.getElementById("divContents").innerHTML = "";
+                //document.getElementById("divContents").innerHTML = requestBody;
+                //$("#tblLogDetails").empty();
+                //$("#tblLogDetails").append(logDetail);
+                //}
+                //else {
+                document.getElementById("divContents").innerHTML = "";
+                $("#tblLogDetails").empty();
+                //}
+            }
+            $('#logModal').modal('show');
+        }
+
+
+        function removeXMLInvalidChars(string, removeDiscouragedChars = true) {
+            // remove everything forbidden by XML 1.0 specifications, plus the unicode replacement character U+FFFD
+            var regex = /((?:[\0-\x08\x0B\f\x0E-\x1F\uFFFD\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]))/g;
+            string = string.replace(regex, "");
+
+            if (removeDiscouragedChars) {
+                // remove everything not suggested by XML 1.0 specifications
+                regex = new RegExp(
+                    "([\\x7F-\\x84]|[\\x86-\\x9F]|[\\uFDD0-\\uFDEF]|(?:\\uD83F[\\uDFFE\\uDFFF])|(?:\\uD87F[\\uDF" +
+                    "FE\\uDFFF])|(?:\\uD8BF[\\uDFFE\\uDFFF])|(?:\\uD8FF[\\uDFFE\\uDFFF])|(?:\\uD93F[\\uDFFE\\uD" +
+                    "FFF])|(?:\\uD97F[\\uDFFE\\uDFFF])|(?:\\uD9BF[\\uDFFE\\uDFFF])|(?:\\uD9FF[\\uDFFE\\uDFFF])" +
+                    "|(?:\\uDA3F[\\uDFFE\\uDFFF])|(?:\\uDA7F[\\uDFFE\\uDFFF])|(?:\\uDABF[\\uDFFE\\uDFFF])|(?:\\" +
+                    "uDAFF[\\uDFFE\\uDFFF])|(?:\\uDB3F[\\uDFFE\\uDFFF])|(?:\\uDB7F[\\uDFFE\\uDFFF])|(?:\\uDBBF" +
+                    "[\\uDFFE\\uDFFF])|(?:\\uDBFF[\\uDFFE\\uDFFF])(?:[\\0-\\t\\x0B\\f\\x0E-\\u2027\\u202A-\\uD7FF\\" +
+                    "uE000-\\uFFFF]|[\\uD800-\\uDBFF][\\uDC00-\\uDFFF]|[\\uD800-\\uDBFF](?![\\uDC00-\\uDFFF])|" +
+                    "(?:[^\\uD800-\\uDBFF]|^)[\\uDC00-\\uDFFF]))", "g");
+                string = string.replace(regex, "");
+            }
+
+            return string;
+        }
+
+        function stringIsArray(str) {
+            try {
+                return new Function(`return Array.isArray(${str})`)();
+            } catch {
+                return false;
+            }
+        }
+
+    </script>
+}

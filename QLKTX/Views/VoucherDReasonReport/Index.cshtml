@@ -1,0 +1,198 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Thống kê thu chi theo loại thu, loại chi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Từ ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateFrom" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Đến ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateTo" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="inputName">Dự án</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuilding" class="easyui-combobox entry_required" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPage()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row" style="padding-top: 10px;">
+        <div class="col-12">
+            <table id="dgVoucherDReason" class="table table-bordered table-hover projects display nowrap" cellspacing="0">
+            </table>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var lstDebtList = [];
+        var editIndexD = undefined;
+        var searchModel = {
+            FromDate: null,
+            ToDate: null,
+            BuildingKey: null,
+            RenderType: null,
+            FunctionID: FunctionID
+        };
+
+        var objCombo = {
+            cboBuildingData: []
+        };
+
+        $(document).ready(async function () {
+            var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+            var lastDay = moment().endOf('month').format('DD/MM/YYYY');
+            $('#txtSearchDateFrom').val(firstDay);
+            $('#txtSearchDateTo').val(lastDay);
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', true, 300);
+            //
+            $.ajaxSettings.async = true;
+        });
+
+        function onSearchPage() {
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            searchModel.FromDate = moment($("[id$=txtSearchDateFrom]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.ToDate = moment($("[id$=txtSearchDateTo]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.BuildingKey = $("[id=cboSearchBuilding]").combobox("getValue");
+
+            CallAjaxGetData(searchModel);
+        }
+
+        function CallAjaxGetData(searchModel) {
+            ajaxindicatorstart(VNMessageR.COMMON_00011);
+            $.ajax({
+                type: "POST",
+                url: "/VoucherDReasonReport/SearchReportv2",
+                headers: { 'FunctionID': FunctionID },
+                dataType: "json",
+                contentType: "application/json;",
+                data: JSON.stringify(searchModel),
+                success: function (result) {
+                    if (result.Success && result.Data != null && result.Data.Items.length > 0) {
+                        var dataR = result.Data.Items;
+                        var columns = [];
+                        var columnNames = Object.keys(dataR[0]);
+                        var Remove_ColumnNames = ['bold', 'Bold'];
+                        for (var i in columnNames) {
+                            if (Remove_ColumnNames.indexOf(columnNames[i]) !== -1) {
+                                //Lấy những field không có trong ds này
+                            } else {
+                                columns.push({
+                                    data: columnNames[i],
+                                    title: capitalizeFirstLetter(columnNames[i])
+                                });
+                            }
+                        }
+                        if ($.fn.DataTable.isDataTable('#dgVoucherDReason')) {
+                            $("#dgVoucherDReason").DataTable().destroy();
+                            $("#dgVoucherDReason").empty();
+                        }
+
+                        $('#dgVoucherDReason').DataTable({
+                            scrollX: true,
+                            data: dataR,
+                            bAutoWidth: true, dom: 'Bfrtip',
+                            buttons: [
+                                {
+                                    text: 'Excel',
+                                    action: function (e, dt, node, config) {
+                                        onExportFile("Excel");
+                                    }
+                                },
+                            ],
+                            createdRow: function (row, data, dataIndex) {
+                                switch (data.bold) {
+                                    case 1:
+                                        $(row).css({ "fontWeight": "bold" });
+                                        break;
+                                    case 2:
+                                        $(row).css({ "font-style": "italic" });
+                                        break;
+                                    case 3:
+                                        $(row).css({ "fontWeight": "bold", "font-style": "italic" });
+                                        break;
+                                    default:
+                                        $(row).css({ "font-style": "normal" });
+                                        break;
+                                }
+                            },
+                            columns: columns,
+                            pageLength: ProjectCF.configs.pageSize
+                        });
+                    }
+                    else {
+                        // Fail
+                        if ($.fn.DataTable.isDataTable('#dgVoucherDReason')) {
+                            $("#dgVoucherDReason").DataTable().destroy();
+                            $("#dgVoucherDReason").empty();
+                        }
+
+                        //ToastrWarning(iTotal, DSAlert, "00010");
+                    }
+
+                    ajaxindicatorstop();
+                },
+                error: function (err) {
+                    ToastrErr(err);
+                    ajaxindicatorstop();
+                }
+            });
+        }
+
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function onExportFile(renderType) {
+            searchModel.RenderType = renderType;
+            //var result = getDataFromApiSyncParams("/SummaryVoucherReport/SearchReport", FunctionID, null);
+            window.open(`/VoucherDReasonReport/ExportExcel?FromDate=${searchModel.FromDate}&ToDate=${searchModel.ToDate}&BuildingKey=${searchModel.BuildingKey}`, target = "_blank");
+
+        }
+    </script>
+}

@@ -1,0 +1,248 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Thống kê hợp đồng";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label>Đến ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateTo" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Dự án</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuilding" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Khu vực</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuildingSection" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-3">
+                            <div class="form-group">
+                                <label for="inputName">Đối tác</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchPartner" class="easyui-combobox" autocomplete="off" />
+                                    <input type="hidden" id="txtSearchPartnerKey" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Chi tiết thu chi</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblContractDetail" class="table table-bordered table-hover projects display nowrap" cellspacing="0">
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+
+        var searchModel = {
+            DateFrom: null,
+            ToDate: null,
+            BuildingKey: null,
+            RenderType: null,
+            BuildingSectionKey: null,
+            PartnerKey: null,
+            FunctionID: FunctionID
+        };
+
+        var objCombo = {
+            cboBuildingData: [],
+            cboPartnerData: [],
+            cboBuildingSectionData: []
+        };
+
+        $(document).ready(async function () {
+            var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+            var lastDay = moment().endOf('month').format('DD/MM/YYYY');
+            //$('#txtSearchDateFrom').val(firstDay);
+            $('#txtSearchDateTo').val(lastDay);
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', false, 300);
+            $("[id=cboSearchBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboBuildingSectionData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/building-section?key=${record.Id}&active=1`);
+                    initComboBox(objCombo.cboBuildingSectionData, 'cboSearchBuildingSection', false, 300);
+                    initAutoCompletexPartner(record.Id, 3, "cboSearchPartner", "txtSearchPartnerKey", null, null, null, null, false);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboSearchBuildingSection', false, 300);
+                    initComboBox([], 'cboSearchPartner', false, 300);
+                }
+            });
+
+            $.ajaxSettings.async = true;
+        });
+
+        function onSearchPaging() {
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            var building = $("[id=cboSearchBuilding]").combobox("getValue");
+            var buildingS = $("[id=cboSearchBuildingSection]").combobox("getValue");
+            var partner = $("[id=cboSearchPartner]").combobox("getValue");
+            //searchModel.DateFrom = moment($("[id$=txtSearchDateFrom]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.ToDate = moment($("[id$=txtSearchDateTo]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.BuildingKey = building ? getInt(building) : 0;
+            searchModel.BuildingSectionKey = buildingS ? getInt(buildingS) : 0;
+            searchModel.PartnerKey = partner ? getInt(partner) : 0;
+
+            CallAjaxGetData(searchModel);
+        }
+
+        function CallAjaxGetData(searchModel) {
+            ajaxindicatorstart(VNMessageR.COMMON_00011);
+            $.ajax({
+                type: "POST",
+                url: "/ContractStatisticsReport/SearchReportv2",
+                headers: { 'FunctionID': FunctionID },
+                dataType: "json",
+                contentType: "application/json;",
+                data: JSON.stringify(searchModel),
+                success: function (result) {
+                    if (result.Success && result.Data != null && result.Data.Items.length > 0) {
+                        var dataR = result.Data.Items;
+                        var columns = [];
+                        var columnNames = Object.keys(dataR[0]);
+                        var Remove_ColumnNames = ['bold', 'Bold'];
+                        let flag = false;
+                        for (var i in columnNames) {
+                            if (Remove_ColumnNames.indexOf(columnNames[i]) !== -1) {
+                                //Lấy những field không có trong ds này
+                            } else {
+                                if (flag) {
+                                    columns.push({
+                                        data: columnNames[i],
+                                        title: capitalizeFirstLetter(columnNames[i]),
+                                        className: "text-right"
+                                    });
+                                } else {
+                                    columns.push({
+                                        data: columnNames[i],
+                                        title: capitalizeFirstLetter(columnNames[i])
+                                    });
+                                }
+
+                                if (columnNames[i].includes("Trạng thái")) {
+                                    flag = true;
+                                }
+                            }
+                        }
+                        if ($.fn.DataTable.isDataTable('#tblContractDetail')) {
+                            $("#tblContractDetail").DataTable().destroy();
+                            $("#tblContractDetail").empty();
+                        }
+
+                        $('#tblContractDetail').DataTable({
+                            scrollX: true,
+                            data: dataR,
+                            bAutoWidth: true, dom: 'Bfrtip',
+                            buttons: [
+                                {
+                                    text: 'Excel',
+                                    action: function (e, dt, node, config) {
+                                        onExportFile("Excel");
+                                    }
+                                },
+                            ],
+                            createdRow: function (row, data, dataIndex) {
+                                switch (data.bold) {
+                                    case 1:
+                                        $(row).css({ "fontWeight": "bold" });
+                                        break;
+                                    case 2:
+                                        $(row).css({ "font-style": "italic" });
+                                        break;
+                                    case 3:
+                                        $(row).css({ "fontWeight": "bold", "font-style": "italic" });
+                                        break;
+                                    default:
+                                        $(row).css({ "font-style": "normal" });
+                                        break;
+                                }
+                            },
+                            columns: columns,
+                            pageLength: ProjectCF.configs.pageSize,
+                            aaSorting: []
+                        });
+                    }
+                    else {
+                        // Fail
+                        if ($.fn.DataTable.isDataTable('#tblContractDetail')) {
+                            $("#tblContractDetail").DataTable().destroy();
+                            $("#tblContractDetail").empty();
+                        }
+
+                        //ToastrWarning(iTotal, DSAlert, "00010");
+                    }
+
+                    ajaxindicatorstop();
+                },
+                error: function (err) {
+                    ToastrErr(err);
+                    ajaxindicatorstop();
+                }
+            });
+        }
+
+
+        function capitalizeFirstLetter(string) {
+            return string.charAt(0).toUpperCase() + string.slice(1);
+        }
+
+        function onExportFile(renderType) {
+            searchModel.RenderType = renderType;
+            //var result = getDataFromApiSyncParams("/SummaryVoucherReport/SearchReport", FunctionID, null);
+            window.open(`/ContractStatisticsReport/ExportExcel?ToDate=${searchModel.ToDate}&BuildingKey=${searchModel.BuildingKey}&BuildingSectionKey=${searchModel.BuildingSectionKey}&PartnerKey=${searchModel.PartnerKey}`, target = "_blank");
+
+        }
+    </script>
+}

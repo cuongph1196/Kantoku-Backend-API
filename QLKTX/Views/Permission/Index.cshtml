@@ -1,0 +1,398 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Phân quyền";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="form-group list-scroll-left cls-permiss-list">
+                                <div id="dl_Module" class="easyui-datalist" title="Phân hệ" style="width: auto; height: 150px;"></div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="form-group list-scroll-right cls-permiss-list">
+                                <div id="dl_Group" class="easyui-datalist" title="Nhóm người dùng" style="width: auto; height: 150px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSavePermission(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")><i class="fas fa-save"></i> Lưu</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info card-modal-sm">
+                <div class="card-header">
+                    <h3 class="card-title">DS Chức năng</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tbl_FunctionList" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%; text-align: center;">STT</th>
+                                <th style="width: 30%; text-align: left;">Chức năng</th>
+                                <th style="width: 5%; text-align: center;">
+                                    Xem<br />
+                                    <input type="checkbox" id="chkView" class='chkRow' onchange="onchange_CheckBox('chkView','FView01')" />
+                                </th>
+                                <th style="width: 5%; text-align: center;">
+                                    Thêm<br />
+                                    <input type="checkbox" id="chkAdd" class='chkRow' onchange="onchange_CheckBox('chkAdd','FAdd01')" />
+                                </th>
+                                <th style="width: 5%; text-align: center;">
+                                    Sửa<br />
+                                    <input type="checkbox" id="chkEdit" class='chkRow' onchange="onchange_CheckBox('chkEdit','FEdit01')" />
+                                </th>
+                                <th style="width: 5%; text-align: center;">
+                                    Xóa<br />
+                                    <input type="checkbox" id="chkDel" class='chkRow' onchange="onchange_CheckBox('chkDel','FDel01')" />
+                                </th>
+                                <th style="width: 5%; text-align: center;">
+                                    Duyệt<br />
+                                    <input type="checkbox" id="chkApp" class='chkRow' onchange="onchange_CheckBox('chkApp','FApp01')" />
+                                </th>
+                                <th style="width: 5%; text-align: center;">
+                                    Hủy Duyệt<br />
+                                    <input type="checkbox" id="chkReject" class='chkRow' onchange="onchange_CheckBox('chkReject','FReject01')" />
+                                </th>
+                                <th style="width: 7%; text-align: center;">
+                                    Tất cả<br />
+                                    <input type="checkbox" id="chkAll" onchange="onchange_CheckAll()" />
+                                </th>
+                                <th style="width: 20%; text-align: center;">
+                                    Mã truy cập dữ liệu<br />
+                                    <input id="cbo_LevelKeyMaster" class="easyui-combotree" name="cbo_LevelKeyMaster" style="width: 200px !important; text-align: center;" data-options="animate:true, prompt:''">
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var FunctionID = "@Model.FunctionID";
+        var objCombo = {
+            cboModuleData: [],
+            cboUserGroupData: [],
+            cboLevelKeyData: []
+        };
+        $(document).ready(async function () {
+            initCombo();
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboModuleData = getDataCombobox(ProjectCF.configs.baseApi + "/Common/combobox/module");
+            initDataList(objCombo.cboModuleData, "dl_Module");
+            $('#dl_Module').datalist({
+                onSelect: function (index, row) {
+                    getFunctionPermission();
+                }
+            });
+            objCombo.cboUserGroupData = getDataCombobox(ProjectCF.configs.baseApi + "/Common/combobox/usergroup?active=1");
+            initDataList(objCombo.cboUserGroupData, "dl_Group");
+            $('#dl_Group').datalist({
+                onSelect: function (index, row) {
+                    getFunctionPermission();
+                }
+            });
+            objCombo.cboLevelKeyData = getDataComboTree(ProjectCF.configs.baseApi + "/Common/combotree/level-company-structure");
+            initComboTreeSelectParent(objCombo.cboLevelKeyData, "cbo_LevelKeyMaster", false, 300);
+            $('#cbo_LevelKeyMaster').combotree({
+                onChange: function (newValue, oldValue) {
+                    $('.LevelKey01').combotree("setValue", $('#cbo_LevelKeyMaster').combotree("getValue"));
+                }
+            });
+            $.ajaxSettings.async = true;
+        }
+
+        function onchange_CheckBox(id, cls) {
+            if ($("#" + id).is(":checked")) {
+                $('tr.data-function-list').each(function () {
+                    $(this).find('.' + cls)[0].checked = true;
+                });
+            } else {
+                $('tr.data-function-list').each(function () {
+                    $(this).find('.' + cls)[0].checked = false;
+                });
+            }
+        }
+
+        function onchange_CheckRowField(field, fId, key) {
+            if (field == 'FDel') {
+                if ($('#chkFunction_FDel' + fId).is(":checked") == true) {
+                    $('#chkFunction_FView' + fId).prop('checked', true);
+                    $('#chkFunction_FAdd' + fId).prop('checked', true);
+                    $('#chkFunction_FEdit' + fId).prop('checked', true);
+
+                    ////không cho bỏ chọn
+                    //$('#chkFunction_FView' + fId).prop('disabled', true);
+                    //$('#chkFunction_FAdd' + fId).prop('disabled', true);
+                    //$('#chkFunction_FEdit' + fId).prop('disabled', true);
+                } else {
+                    $("#chkFunction_All_" + key).prop('checked', false);
+
+                    //$('#chkFunction_FEdit' + fId).prop('disabled', false);
+                }
+            }
+            if (field == 'FEdit') {
+                if ($('#chkFunction_FDel' + fId).is(":checked") == true) {
+                    $('#chkFunction_FEdit' + fId).prop('checked', true);
+                }
+                if ($('#chkFunction_FEdit' + fId).is(":checked") == true) {
+                    $('#chkFunction_FView' + fId).prop('checked', true);
+                    $('#chkFunction_FAdd' + fId).prop('checked', true);
+
+                    //không cho bỏ chọn
+                    //$('#chkFunction_FView' + fId).attr('disabled', true);
+                    //$('#chkFunction_FAdd' + fId).attr('disabled', true);
+                } else {
+                    $("#chkFunction_All_" + key).prop('checked', false);
+
+                    //$('#chkFunction_FAdd' + fId).attr('disabled', false);
+                }
+            }
+            if (field == 'FAdd') {
+                if ($('#chkFunction_FEdit' + fId).is(":checked") == true) {
+                    $('#chkFunction_FAdd' + fId).prop('checked', true);
+                }
+                if ($('#chkFunction_FAdd' + fId).is(":checked") == true) {
+                    $('#chkFunction_FView' + fId).prop('checked', true);
+
+                    //không cho bỏ chọn
+                    //$('#chkFunction_FView' + fId).attr('disabled', true);
+                } else {
+                    $("#chkFunction_All_" + key).prop('checked', false);
+
+                    //$('#chkFunction_FView' + fId).attr('disabled', false);
+                }
+            }
+            if (field == 'FView') {
+                if ($('#chkFunction_FAdd' + fId).is(":checked") == true) {
+                    $('#chkFunction_FView' + fId).prop('checked', true);
+                }
+            }
+            if (field == 'FApp') {
+                if ($('#chkFunction_FApp' + fId).is(":checked") == false) {
+                    $("#chkFunction_All_" + key).prop('checked', false);
+                }
+            }
+            if (field == 'FReject') {
+                if ($('#chkFunction_FReject' + fId).is(":checked") == false) {
+                    $("#chkFunction_All_" + key).prop('checked', false);
+                }
+            }
+        }
+
+        function onchange_CheckRowAll(key) {
+            if ($("#chkFunction_All_" + key).is(":checked")) {
+                $('tr.data-function-list').each(function (ikey) {
+                    if (ikey == key) {
+                        $(this).find('.FView01')[0].checked = true;
+                        $(this).find('.FAdd01')[0].checked = true;
+                        $(this).find('.FEdit01')[0].checked = true;
+                        $(this).find('.FDel01')[0].checked = true;
+                        $(this).find('.FApp01')[0].checked = true;
+                        $(this).find('.FReject01')[0].checked = true;
+                    }
+                });
+            } else {
+                $('tr.data-function-list').each(function (ikey) {
+                    if (ikey == key) {
+                        $(this).find('.FView01')[0].checked = false;
+                        $(this).find('.FAdd01')[0].checked = false;
+                        $(this).find('.FEdit01')[0].checked = false;
+                        $(this).find('.FDel01')[0].checked = false;
+                        $(this).find('.FApp01')[0].checked = false;
+                        $(this).find('.FReject01')[0].checked = false;
+                    }
+                });
+            }
+        }
+
+        function onchange_CheckAll() {
+            if ($("#chkAll").is(":checked")) {
+                $('tr.data-function-list').each(function () {
+                    $(this).find('.FView01')[0].checked = true;
+                    $(this).find('.FAdd01')[0].checked = true;
+                    $(this).find('.FEdit01')[0].checked = true;
+                    $(this).find('.FDel01')[0].checked = true;
+                    $(this).find('.FApp01')[0].checked = true;
+                    $(this).find('.FReject01')[0].checked = true;
+                    $(this).find('.FAll01')[0].checked = true;
+                    $(".chkRow").prop('checked', true);
+                });
+            } else {
+                $('tr.data-function-list').each(function () {
+                    $(this).find('.FView01')[0].checked = false;
+                    $(this).find('.FAdd01')[0].checked = false;
+                    $(this).find('.FEdit01')[0].checked = false;
+                    $(this).find('.FDel01')[0].checked = false;
+                    $(this).find('.FApp01')[0].checked = false;
+                    $(this).find('.FReject01')[0].checked = false;
+                    $(this).find('.FAll01')[0].checked = false;
+                    $(".chkRow").prop('checked', false);
+                });
+            }
+        }
+
+        //get data in prescription detail
+        function getDataUserPermission() {
+            var data = [];
+            $('tr.data-function-list').each(function () {
+                var dt_FunctionID = $(this).find('.FunctionID01').val();
+                var dt_FView = ($(this).find('.FView01').length > 0 && $(this).find('.FView01')[0].checked) ? 1 : 0;
+                var dt_FAdd = ($(this).find('.FAdd01').length > 0 && $(this).find('.FAdd01')[0].checked) ? 1 : 0;
+                var dt_FEdit = ($(this).find('.FEdit01').length > 0 && $(this).find('.FEdit01')[0].checked) ? 1 : 0;
+                var dt_FDel = ($(this).find('.FDel01').length > 0 && $(this).find('.FDel01')[0].checked) ? 1 : 0;
+                var dt_FApp = ($(this).find('.FApp01').length > 0 && $(this).find('.FApp01')[0].checked) ? 1 : 0;
+                var dt_FReject = ($(this).find('.FReject01').length > 0 && $(this).find('.FReject01')[0].checked) ? 1 : 0;
+                var dt_LevelKey = $(this).find('.LevelKey01').combotree("getValue");
+                var alldata = {
+                    'FunctionID': dt_FunctionID,
+                    'FView': dt_FView,
+                    'FAdd': dt_FAdd,
+                    'FEdit': dt_FEdit,
+                    'FDel': dt_FDel,
+                    'FApp': dt_FApp,
+                    'FReject': dt_FReject,
+                    'LevelKey': dt_LevelKey
+                };
+                data.push(alldata);
+            });
+            return data;
+        }
+
+        function getFunctionPermission() {
+            $(".chkRow").prop('checked', false);
+            $("#chkAll").prop('checked', false);
+            var ModuleID = $("#dl_Module").datalist("getSelected") ? $("#dl_Module").datalist("getSelected").Id : "";
+            var GroupID = $("#dl_Group").datalist("getSelected") ? $("#dl_Group").datalist("getSelected").Id : "";
+            if (GroupID !== "" && ModuleID !== "") {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                var objSearch = {
+                    GroupID: GroupID,
+                    ModuleID: ModuleID
+                };
+                $.ajax({
+                    type: "GET",
+                    contentType: "application/json; charset=utf-8",
+                    url: "/Permission/GetPermission?ModuleID=" + ModuleID + '&GroupID=' + GroupID,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (result) {
+                        if (result.Success) {
+                            $('#tbl_FunctionList tbody').empty();
+                            $('#cbo_LevelKeyMaster').combotree('setValue', '');
+                            var userPermissData = result.Data.Items;
+                            for (var key in userPermissData) {
+                                if (userPermissData.hasOwnProperty(key)) {
+                                    var dtId = userPermissData[key]["FunctionID"];
+                                    var htmlrow = '';
+                                    htmlrow += '<tr id="addr' + dtId + '" class="data-function-list">' +
+                                        "<td style='width: 30px; text-align: center;' class='function-list'>" + parseInt(parseInt(key) + 1) + "</td>" +
+                                        "<td hidden style='width: 30px;'><input hidden id='chkFunction_FunctionID" + dtId + "'value='" + userPermissData[key]["FunctionID"] + "' class='form-control FunctionID01'/></td>" +
+                                        "<td style='width: 250px; text-align: left;'>" + userPermissData[key]["FunctionName"] + "</td>" +
+                                        "<td style='width: 30px; text-align: center;'><input style='width: 12px; margin:auto;' type='checkbox' id='chkFunction_FView" + dtId + "'value='" + userPermissData[key]["FView"] + "' onchange='onchange_CheckRowField(`FAdd`," + dtId + ", " + key + ")' class='FView01'" + (userPermissData[key]["FView"] == 1 ? 'checked' : '') + "/></td>" +
+                                        "<td style='width: 30px; text-align: center;'><input style='width: 12px; margin:auto;' type='checkbox' id='chkFunction_FAdd" + dtId + "' value='" + userPermissData[key]["FAdd"] + "' onchange='onchange_CheckRowField(`FAdd`," + dtId + ", " + key + ")' class='FAdd01' " + (userPermissData[key]["FAdd"] == 1 ? 'checked' : '') + "/></td>" +
+                                        "<td style='width: 30px; text-align: center;'><input style='width: 12px; margin:auto;' type='checkbox' id='chkFunction_FEdit" + dtId + "' value='" + userPermissData[key]["FEdit"] + "' onchange='onchange_CheckRowField(`FEdit`," + dtId + ", " + key + ")' class='FEdit01' " + (userPermissData[key]["FEdit"] == 1 ? 'checked' : '') + "/></td>" +
+                                        "<td style='width: 30px; text-align: center;'><input style='width: 12px; margin:auto;' type='checkbox' id='chkFunction_FDel" + dtId + "' value='" + userPermissData[key]["FDel"] + "' onchange='onchange_CheckRowField(`FDel`," + dtId + ", " + key + ")' class='FDel01' " + (userPermissData[key]["FDel"] == 1 ? 'checked' : '') + "/></td>" +
+                                        "<td style='width: 30px; text-align: center;'><input style='width: 12px; margin:auto;' type='checkbox' id='chkFunction_FApp" + dtId + "' value='" + userPermissData[key]["FApp"] + "' onchange='onchange_CheckRowField(`FApp`," + dtId + ", " + key + ")' class='FApp01' " + (userPermissData[key]["FApp"] == 1 ? 'checked' : '') + "/></td>" +
+                                        "<td style='width: 30px; text-align: center;'><input style='width: 12px; margin:auto;' type='checkbox' id='chkFunction_FReject" + dtId + "' value='" + userPermissData[key]["FReject"] + "' onchange='onchange_CheckRowField(`FReject`," + dtId + ", " + key + ")' class='FReject01' " + (userPermissData[key]["FReject"] == 1 ? 'checked' : '') + "/></td>" +
+                                        "<td style='width: 50px; text-align: center;'><input style='width: 12px; margin:auto;' type='checkbox' id='chkFunction_All_" + key + "' class='FAll01' onchange='onchange_CheckRowAll(" + key + ");'/></td>" +
+                                        `<td style='width: 150px; text-align: center;'><select id="cbo_LevelKey${dtId}" class="easyui-combotree LevelKey01" name="cbo_LevelKey" style='width:200px !important;' data-options="animate:true, prompt:''"></td>`;
+                                    
+                                    htmlrow += '</tr>';
+                                    $('#tbl_FunctionList').append(htmlrow);
+                                    initComboTreeSelectParent(objCombo.cboLevelKeyData, "cbo_LevelKey" + dtId, false, 300, userPermissData[key]["LevelKey"] ? userPermissData[key]["LevelKey"] : $('#cbo_LevelKeyMaster').combotree("getValue"));
+                                }
+                            }
+                        }
+                        else {
+                            $('#tbl_FunctionList tbody').empty();
+                            var row = "<tr><td colspan='10'>Không có dữ liệu</td></tr>";
+                            $('#tbl_FunctionList').append(row);
+                            toastr.warning(VNMessageR.COMMON_00015);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                $('#tbl_FunctionList tbody').empty();
+                var row = "<tr><td colspan='10'>Không có dữ liệu</td></tr>";
+                $('#tbl_FunctionList').append(row);
+            }
+        }
+
+        function onSavePermission(e) {
+            e.preventDefault();
+            var ModuleID = $("#dl_Module").datalist("getSelected") ? $("#dl_Module").datalist("getSelected").Id : "";
+            var GroupID = $("#dl_Group").datalist("getSelected") ? $("#dl_Group").datalist("getSelected").Id : "";
+            if (GroupID !== "" && ModuleID !== "") {
+                var objParams = {
+                    GroupID: GroupID,
+                    ModuleID: ModuleID
+                };
+                //get data detail
+                var jsonData = getDataUserPermission();
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                if (jsonData.length > 0) {
+                    objParams.jsonData = JSON.stringify(jsonData);
+                    $.ajax({
+                        type: "POST",
+                        headers: { 'FunctionID': FunctionID },
+                        url: "/Permission/SavePermission",
+                        dataType: "json",
+                        contentType: "application/json; charset=utf-8;",
+                        data: JSON.stringify(objParams),
+                        success: function (result) {
+                            if (result.Success) {
+                                toastr.success(VNMessageR.COMMON_00003);
+                                getFunctionPermission();
+                            }
+                            else {
+                                ToastrErr(result);
+                            }
+                            ajaxindicatorstop();
+                        }, error: function (err) {
+                            ToastrException(err);
+                            ajaxindicatorstop();
+                        }
+                    });
+                } else {
+                    ToastrWarning(iTotal, DSAlert, "00009");
+                    ajaxindicatorstop();
+                    return false;
+                }
+            }
+        }
+
+    </script>
+}

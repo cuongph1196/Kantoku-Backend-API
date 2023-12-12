@@ -1,0 +1,51 @@
+﻿@using System.Globalization
+@model QLKTX.Models.UploadDocumentsViewModel;
+
+<div class="card card-info card-modal-sm">
+    <div class="card-header">
+        <h3 class="card-title">DS tài liệu</h3>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body table-responsive p-0" style="min-height: 100px; height: auto;">
+        <table id="tblDocuments" class="table table-head-fixed table-bordered table-hover projects">
+            <thead>
+                <tr>
+                    <th>Tên tệp</th>
+                    <th style="width: 200px;">Link</th>
+                    <th style="width: 100px; text-align: center;"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @if (Model != null && Model.Documents != null && Model.Documents.Count() > 0)
+                {
+                    @foreach (var doc in Model.Documents)
+                    {
+                        <tr>
+                            <td>@doc.FileName</td>
+                            <td><a href="@doc.FileUrl" target="_blank">@doc.FileUrl</a></td>
+                            @if (Model.isDel)
+                            {
+                                <td style="text-align: right;">
+                                    <button class="btn btn-danger btn-xs" onclick="onDeleteFileUpload(event, @doc.ID, @doc.MasterKey)"> <i class="fas fa-trash"></i> Xóa</button>
+                                </td>
+                            }
+                            else{
+                                <td></td>
+                            }
+                        </tr>
+                    }
+                }
+                else
+                {
+                    <tr>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <!-- /.card-body -->
+</div>
+<!-- /.card -->

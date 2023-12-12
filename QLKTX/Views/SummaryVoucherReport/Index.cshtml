@@ -1,0 +1,262 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Báo cáo tổng hợp thu chi";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Từ ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateFrom" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label>Đến ngày</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtSearchDateTo" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" autocomplete="off" data-mask>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="form-group">
+                                <label for="inputName">Dự án</label>
+                                <div class="">
+                                    <input type="text" id="cboSearchBuilding" class="easyui-combobox" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- /.card-body -->
+                <div class="card-footer clearfix text-center">
+                    <button type="button" class="btn btn-sm btn-primary" onclick="onSearchPaging()" @(Model.FUPermiss.FView ? "" : "disabled")><i class="fa fa-search"></i> Tìm kiếm</button>
+                </div>
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-info">
+                <div class="card-header">
+                    <h3 class="card-title">Tổng hợp thu chi</h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <table id="tblSummaryVoucher" class="table table-bordered table-hover projects">
+                        <thead>
+                            <tr>
+                                <th>STT</th>
+                                <th>Mã dự án</th>
+                                <th>Tên dự án</th>
+                                <th>Tồn đầu</th>
+                                <th>Tiền thu</th>
+                                <th>Tiền chi</th>
+                                <th>Tồn cuối</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                        <tfoot>
+                        </tfoot>
+                    </table>
+                </div>
+                <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var FunctionID = "@Model.FunctionID";
+
+        var searchModel = {
+            DateFrom: null,
+            DateTo: null,
+            BuildingKey: null,
+            RenderType: null,
+            FunctionID: FunctionID
+        };
+
+        var objCombo = {
+            cboBuildingData: []
+        };
+
+        $(document).ready(async function () {
+            var firstDay = moment().startOf('month').format('DD/MM/YYYY');
+            var lastDay = moment().endOf('month').format('DD/MM/YYYY');
+            $('#txtSearchDateFrom').val(firstDay);
+            $('#txtSearchDateTo').val(lastDay);
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboSearchBuilding', false, 300);
+            //
+            onSearchPaging();
+            $.ajaxSettings.async = true;
+        });
+        function onSearchPaging() {
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            searchModel.DateFrom = moment($("[id$=txtSearchDateFrom]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.DateTo = moment($("[id$=txtSearchDateTo]").val(), "DD/MM/YYYY").format("YYYYMMDD");
+            searchModel.BuildingKey = $("[id=cboSearchBuilding]").combobox("getValue");
+
+            BindingDataTable();
+        }
+
+        function BindingDataTable() {
+            $("#tblSummaryVoucher").DataTable().destroy();
+            $("#tblSummaryVoucher tbody").empty(); // empty tbody
+            $("#tblSummaryVoucher").DataTable({
+                bAutoWidth: false,
+                ordering: true,
+                info: true,
+                bFilter: false,
+                processing: false,
+                serverSide: true,
+                dom: 'Bfrtip',
+                //buttons: [
+                //    'copy', 'csv', 'excelHtml5', 'pdf', 'print'
+                //],
+                buttons: [
+                    {
+                        text: 'Excel',
+                        action: function (e, dt, node, config) {
+                            onExportFile("Excel");
+                        }
+                        //},{
+                        //    text: 'Pdf',
+                        //    action: function (e, dt, node, config) {
+                        //        onExportFile("Pdf");
+                        //    }
+                        //},{
+                        //    text: 'Word',
+                        //    action: function (e, dt, node, config) {
+                        //        onExportFile("Word");
+                        //    }
+                    },
+                ],
+                lengthMenu: [[10, 25, 50, 100], [10, 25, 50, 100]],
+                pageLength: ProjectCF.configs.pageSize,
+                ajax: {
+                    type: "GET",
+                    url: "/SummaryVoucherReport/SearchPaging",
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    data: function (data) {
+                        ajaxindicatorstart(VNMessageR.COMMON_00011);
+
+                        var dataSearch = {};
+                        dataSearch.Draw = data.draw;
+                        dataSearch.PageIndex = data.start;
+                        dataSearch.PageSize = data.length;
+                        var colIndex = data.order[0].column;
+                        var colName = GetSortColumnNameFromIndex(colIndex, data.columns);
+                        dataSearch.SortItem = colName;
+                        dataSearch.SortDirection = data.order[0].dir;
+
+                        dataSearch.FromDate = searchModel.DateFrom;
+                        dataSearch.ToDate = searchModel.DateTo;
+                        dataSearch.BuildingKey = searchModel.BuildingKey;
+                        dataSearch.FunctionID = FunctionID;
+
+                        return dataSearch;
+                    },
+                    dataSrc: function (json) {
+                        ajaxindicatorstop();
+                        return json.data;
+                    },
+                    error: function (err) {
+                        ajaxindicatorstop();
+                    }
+                },
+                "columns": [
+                    {
+                        "data": "STT", "sortable": false,
+                        "className": "text-center",
+                        "width": 60,
+                        "render": function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    },
+                    { "data": "BuildingCode", "className": "text-center", "sortable": true },
+                    { "data": "BuildingName", "className": "text-center", "sortable": false },
+                    {
+                        "data": "BeginAmount", "sortable": false,
+                        "className": "text-right",
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            return full.BeginAmount != null ? accounting.formatNumber(full.BeginAmount) : 0;
+                        }
+                    },
+                    {
+                        "data": "InAmount", "sortable": false,
+                        "className": "text-right",
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            return full.InAmount != null ? accounting.formatNumber(full.InAmount) : 0;
+                        }
+                    },
+                    {
+                        "data": "OutAmount", "sortable": false,
+                        "className": "text-right",
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            return full.OutAmount != null ? accounting.formatNumber(full.OutAmount) : 0;
+                        }
+                    },
+                    {
+                        "data": "RemainAmount", "sortable": false,
+                        "className": "text-right",
+                        "width": 100,
+                        "render": function (data, type, full, meta) {
+                            return full.RemainAmount != null ? accounting.formatNumber(full.RemainAmount) : 0;
+                        }
+                    }
+                ],
+                "aaSorting": [[1, "asc"]],
+                "columnDefs": [
+                    {
+                        'targets': [0], /* column index */
+                        'orderable': false /* true or false */
+                    }
+                ],
+                select: {
+                    style: "multi"
+                }
+            });
+        }
+
+        function onExportFile(renderType) {
+            searchModel.RenderType = renderType;
+            //var result = getDataFromApiSyncParams("/SummaryVoucherReport/SearchReport", FunctionID, null);
+            window.open(`/SummaryVoucherReport/SearchReport?FromDate=${searchModel.DateFrom}&ToDate=${searchModel.DateTo}&RenderType=${searchModel.RenderType}&BuildingKey=${searchModel.BuildingKey}`, target = "_blank");
+
+        }
+
+    </script>
+}

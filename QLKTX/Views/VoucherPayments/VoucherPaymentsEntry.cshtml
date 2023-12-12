@@ -1,0 +1,1094 @@
+﻿@using System.Globalization
+@model QLKTX.Models.PageInfoViewModel;
+@{
+    Layout = "~/Views/Shared/_LayoutEntry.cshtml";
+    ViewData["Title"] = Model.FunctionName != null ? Model.FunctionName.ToString() : "Phiếu chi";
+}
+<div class="container-fluid pt-2">
+    <div class="row">
+        <div class="col-sm-3">
+            <div class="card card-modal-sm">
+                <div class="card-header">
+                    <h4 class="card-title">Thông tin chứng từ</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="red" for="inputName">Số chứng từ (*)</label>
+                                <input type="text" id="txtTransNo" class="form-control form-control-sm" autocomplete="off" readonly />
+                                <input type="hidden" id="txtMasterRowkey" class="form-control form-control-sm" autocomplete="off" readonly />
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label class="red">Ngày chứng từ (*)</label>
+                                <div class="input-group date">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="far fa-calendar-alt"></i></span>
+                                    </div>
+                                    <input id="txtTransDate" type="text" class="form-control form-control-sm date-picker entry_required" data-inputmask-alias="datetime" data-inputmask-inputformat="dd/mm/yyyy" data-mask autocomplete="off">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Mã máy thu</label>
+                                <input type="text" id="txtPOSKey" class="form-control form-control-sm" autocomplete="off" readonly />
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">NV thu tiền</label>
+                                <input type="text" id="txtCashierKey" class="form-control form-control-sm" autocomplete="off" readonly />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-9">
+            <div class="card card-info card-modal-sm">
+                <div class="card-header">
+                    <h4 class="card-title">Thông tin khách hàng</h4>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="red" for="inputName">Dự án (*)</label>
+                                <div class="">
+                                    <input type="text" id="cboBuilding" class="easyui-combobox entry_required" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="red" for="inputName">Mặt bằng/Ki-ốt (*)</label>
+                                <div class="">
+                                    <input type="text" id="cboDepartment" class="easyui-combobox entry_required" autocomplete="off" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label class="red" for="inputName">Khách hàng (*)</label>
+                                <div class="">
+                                    <input type="text" id="cboPartner" class="easyui-combobox entry_required" autocomplete="off" />
+                                    <input type="hidden" id="txtPartnerKey" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="inputName">Mã số thuế</label>
+                                <input type="text" id="txtPartnerTaxNumber" class="form-control form-control-sm" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="inputName">Tên công ty</label>
+                                <input type="text" id="txtPartnerTaxName" class="form-control form-control-sm" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-sm-3">
+                            <div class="form-group">
+                                <label for="inputName">Địa chỉ</label>
+                                <input type="text" id="txtPartnerTaxAddress" class="form-control form-control-sm" autocomplete="off" />
+                            </div>
+                        </div>
+                        <div class="col-sm-12">
+                            <div class="form-group">
+                                <label for="inputName">Mô tả</label>
+                                <textarea id="txtDescription" class="form-control form-control-sm" rows="4" autocomplete="off"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <table id="dgVoucherDetail" class="easyui-datagrid table-data datagrid-modal" title="DS chi tiết" style="height: 400px;"></table>
+    </div>
+    </br>
+    <div class="row" id="frmDocument">
+        <div class="col-4">
+            <div class="form-group">
+                <label for="txtFileUpload">Tải file lên</label>
+                <div class="input-group" style="height: 31px !important;">
+                    <div class="custom-file" style="height: 31px !important;">
+                        <input type="file" class="custom-file-input form-control-sm" id="txtFileUpload" multiple="multiple">
+                        <label class="custom-file-label form-control-sm" for="txtFileUpload" style="height: 31px !important;"></label>
+                    </div>
+
+                    <div class="input-group-append" style="height: 31px !important;">
+                        <button type="button" class="btn btn-sm btn-success" onclick="onUploadFile(event)"><i class="fas fa-upload"></i> Lưu ảnh</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-12" id="divUploadDocuments">
+            @await Component.InvokeAsync("UploadDocuments")
+        </div>
+    </div>
+    <div class="d-flex justify-content-center align-items-center">
+        <div id="divCreate" class="form-group mx-1">
+            <button type="button" id="btnCreate" class="btn btn-primary" onclick="onCreate(event)" @(Model.FUPermiss.FAdd ? "" : "disabled")>Lưu</button>
+        </div>
+        <div id="divUpdate" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnUpdate" class="btn btn-primary" onclick="onUpdate(event)" @(Model.FUPermiss.FEdit ? "" : "disabled")>Lưu</button>
+        </div>
+        <div id="divApprove" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnApprove" class="btn btn-info" onclick="onApprove(event)" @(Model.FUPermiss.FApp ? "" : "disabled")>Duyệt</button>
+        </div>
+        <div id="divReject" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnReject" class="btn btn-info" onclick="onReject(event)" @(Model.FUPermiss.FReject ? "" : "disabled")>Hủy Duyệt</button>
+        </div>
+        <div id="divDelete" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnDelete" class="btn btn-danger" onclick="onDelete(event)" @(Model.FUPermiss.FDel ? "" : "disabled")>Xóa</button>
+        </div>
+        <div id="divRestore" class="form-group mx-1" style="display:none;">
+            <button type="button" id="btnRestore" class="btn btn-danger" onclick="onRestore(event)" @(Model.FUPermiss.FDel ? "" : "disabled")>Khôi phục</button>
+        </div>
+    </div>
+</div>
+
+@section scripts {
+    <script type="text/javascript">
+        var MasterKey = parseInt(GetURLParameter('masterKey') ? GetURLParameter('masterKey') : 0);
+        var OldTransID = GetURLParameter('tempTransID') != null ? GetURLParameter('tempTransID') : "";
+        var OldMasterKey = parseInt(GetURLParameter('tempKey') ? GetURLParameter('tempKey') : 0);
+        var TransDate = GetURLParameter('transDate') ? GetURLParameter('transDate') : '';
+        var requiredList = document.getElementsByClassName("entry_required");
+        var editIndex = undefined;
+        var OldTransNo = '';
+        var FunctionID = "@Model.FunctionID";
+        var TransID = "@Model.TransID";
+        var ClosingDate = "@Model.ClosingDate";
+        var searchModel = {
+            DateFrom: null,
+            DateTo: null,
+            SearchParams: null
+        };
+        var objCombo = {
+            cboBuildingData: [],
+            cboDepartmentData: [],
+            cboPartnerData: [],
+            cboReasonData: []
+        };
+        var objDataEntry = {
+            objVoucher: {},
+            arrVDetails: []
+        };
+        $(document).ready(async function () {
+            //init upload file
+            bsCustomFileInput.init();
+            //Ngày khóa sổ
+            if (ClosingDate != "") {
+                var startDate = moment(ClosingDate, 'YYYYMMDD');
+                var startDateFormat = moment(startDate).add(1, 'days');
+                var endDate = moment();
+                $('#txtTransDate').datepicker('option', {
+                    minDate: new Date(startDateFormat),
+                    maxDate: new Date(endDate)
+                });
+            }
+            $.ajaxSettings.async = false;
+            initCombo();
+            if(MasterKey > 0){
+                onGetByID(MasterKey);
+            }
+            else if (OldMasterKey > 0){
+                switch(OldTransID){
+                    case "PTRA01":
+                        onGetByOther(OldMasterKey);
+                        break;
+                };
+            }
+            else {
+                resetFormData();
+                BindingDataToGrid([]);
+                $("#frmDocument").css("display", "none");
+            }
+            onLockFormEntryChanged();
+            $.ajaxSettings.async = true;
+            setTimeout(function () {
+                if (TransDate !== '') {
+                    //trandate format thành dd/mm/yyyy
+                    var tranDate = moment(TransDate, 'DD/MM/YYYY').format('YYYY-MM-DD');
+                    var ClosingDateFormat = moment(startDate).add(1, 'days').format("YYYY-MM-DD");
+                    if (tranDate !== 'Invalid date') {
+                        if (tranDate < ClosingDateFormat) {
+                            disableAllForm(true);
+                        }
+                    }
+                }
+            }, 1000);
+        });
+
+        function initCombo() {
+            $.ajaxSettings.async = false;
+            objCombo.cboBuildingData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/Permiss/combobox/building?functionId=${FunctionID}&active=1`);
+            initComboBox(objCombo.cboBuildingData, 'cboBuilding', false, 300);
+            objCombo.cboReasonData = getDataComboTree(ProjectCF.configs.baseApi + `/Common/combotree/reason-by-transId?transId=${TransID}&active=1`);
+            $("[id=cboBuilding]").combobox({
+                onSelect: function (record) {
+                    objCombo.cboDepartmentData = getDataCombobox(ProjectCF.configs.baseApi + `/Common/combobox/department-by-building-v2?buildKey=${record.Id}&buildSectionKey=&active=1`);
+                    initComboBox(objCombo.cboDepartmentData, 'cboDepartment', false, 300);
+                    initAutoCompletexPartner(record.Id, 3, "cboPartner", "txtPartnerKey", null, "txtPartnerTaxNumber", "txtPartnerTaxName", "txtPartnerTaxAddress", true);
+                },
+                onUnselect: function (record) {
+                    initComboBox([], 'cboDepartment', false, 300);
+                    initComboBox([], 'cboPartner', false, 300);
+                }
+            });
+
+            $.ajaxSettings.async = true;
+        }
+
+        //create from other
+        function onGetByOther(rowKey) {
+            if (rowKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/DebtReceipt/GetById/" + rowKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    //data: objParams,
+                    success: function (result) {
+                        if (result.Success) {
+                            resetFormData();
+                            bindingDataToFormOther(result.Data);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                BindingDataToGrid([]);
+            }
+        }
+
+        function bindingDataToFormOther(data) {
+            if (data == null) {
+                BindingDataToGrid([]);
+            }
+            else {
+                objDataEntry.objVoucher = data.Debt;
+                OldTransNo = objDataEntry.objVoucher.TransNo;
+                objDataEntry.objVoucher.Status = 0;
+                objDataEntry.objVoucher.IsDeleted = 0;
+                objDataEntry.objVoucher.TransNo = "";
+                //objDataEntry.objVoucher.TransDate = "";
+                objDataEntry.objVoucher.Rowkey = "";
+                objDataEntry.arrVDetails = data.DebtDetails;
+                setFormData(objDataEntry.objVoucher);
+                setTimeout(() => {
+                    if (objDataEntry.arrVDetails != null && objDataEntry.arrVDetails.length > 0)
+                    {
+                        objDataEntry.arrVDetails.forEach(el => {
+                            el.Rowkey = 0;
+                            el.DetailRowkey = 0;
+                            el.MasterRowkey = 0;
+                        });
+                        BindingDataToGrid(objDataEntry.arrVDetails);
+                    }
+                    else
+                        BindingDataToGrid([]);
+                    //lock không cho sửa khi tạo từ phiếu công nợ phải trả
+                    if (OldTransID === "PTRA01")
+                        disableAllForm(true);
+                }, 500);
+            }
+        }
+
+        //
+        function onGetByID(rowKey) {
+            if (rowKey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: "/VoucherPayments/GetById/" + rowKey,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json; charset=utf-8",
+                    //data: objParams,
+                    success: function (result) {
+                        if (result.Success) {
+                            resetFormData();
+                            bindingDataToForm(result.Data);
+                            onGetDocumentByKey(rowKey);
+                        }
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                BindingDataToGrid([]);
+            }
+        }
+
+        function onGetDocumentByKey(rowkey) {
+            if (rowkey > 0) {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: 'GET',
+                    url: `/VoucherPayments/GetDocumentsUpload?transID=${TransID}&masterKey=${rowkey}`,
+                    headers: { 'FunctionID': FunctionID },
+                    success: function (result) {
+                        $("#divUploadDocuments").html("");
+                        $("#divUploadDocuments").html(result);
+                        ajaxindicatorstop();
+                    }, error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } else {
+                $("#divUploadDocuments").html("");
+            }
+        }
+
+        function bindingDataToForm(data) {
+            if (data == null) {
+                BindingDataToGrid([]);
+            }
+            else {
+                objDataEntry.objVoucher = data.Voucher;
+                objDataEntry.arrVDetails = data.VoucherDetails;
+                setFormData(objDataEntry.objVoucher);
+                setTimeout(() => {
+                    if (objDataEntry.arrVDetails != null && objDataEntry.arrVDetails.length > 0)
+                        BindingDataToGrid(objDataEntry.arrVDetails);
+                    else
+                        BindingDataToGrid([]);
+                    
+                    checkShowAllField(objDataEntry.objVoucher.Status, objDataEntry.objVoucher.IsDeleted);
+                    if (objDataEntry.objVoucher.IsCreatedDebt) {
+                        disableAllForm(true);
+                    }
+                }, 500);
+            }
+        }
+
+        function onCreate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidDetail = ValidateDatagridRows("dgVoucherDetail")
+            if (!isValidForm || !isValidDetail) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            Voucher: getDataMaster(),
+                            VoucherDetails: getDataDetail()
+                        };
+                        CallAjaxSave("Create", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onUpdate(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidDetail = ValidateDatagridRows("dgVoucherDetail");
+            if (!isValidForm || !isValidDetail) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            $.messager.confirm(VNMessageR.COMMON_00010,
+                VNMessageR.COMMON_00007,
+                function (r) {
+                    if (r) {
+                        let objSave = {
+                            Voucher: getDataMaster(),
+                            VoucherDetails: getDataDetail()
+                        };
+                        CallAjaxSave("Update", objSave);
+                    }
+                });
+            return false;
+        }
+
+        function onApprove(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidDetail = ValidateDatagridRows("dgVoucherDetail")
+            if (!isValidForm || !isValidDetail) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            var rowkey = $("#txtMasterRowkey").val() ? getInt($("#txtMasterRowkey").val()) : 0;
+            if (rowkey > 0) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00024,
+                    function (r) {
+                        if (r) {
+                            let objDel = {
+                                ApprovedKey: rowkey,
+                                ApprovedValue: true,
+                                TransID: TransID
+                            };
+                            CallAjaxUpdate("PUT", "Approve", objDel);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function onReject(e) {
+            e.preventDefault();
+            let isValidForm = ValidateControlForm(requiredList);
+            let isValidDetail = ValidateDatagridRows("dgVoucherDetail")
+            if (!isValidForm || !isValidDetail) {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+            var rowkey = $("#txtMasterRowkey").val() ? getInt($("#txtMasterRowkey").val()) : 0;
+            if (rowkey > 0) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00025,
+                    function (r) {
+                        if (r) {
+                            let objDel = {
+                                ApprovedKey: rowkey,
+                                ApprovedValue: false,
+                                TransID: TransID
+                            };
+                            CallAjaxUpdate("PUT", "Reject", objDel);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function onDelete(e) {
+            e.preventDefault();
+            var rowkey = $("#txtMasterRowkey").val() ? getInt($("#txtMasterRowkey").val()) : 0;
+            if (rowkey > 0) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            let objDel = {
+                                DeletedKey: rowkey,
+                                DeletedValue: true
+                            };
+                            CallAjaxUpdate("PUT", "Delete", objDel);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function onRestore(e) {
+            e.preventDefault();
+            var rowkey = $("#txtMasterRowkey").val() ? getInt($("#txtMasterRowkey").val()) : 0;
+            if (rowkey > 0) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00026,
+                    function (r) {
+                        if (r) {
+                            let objDel = {
+                                DeletedKey: rowkey,
+                                DeletedValue: false
+                            };
+                            CallAjaxUpdate("PUT", "Restore", objDel);
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        function onUploadFile(e) {
+            var rowkey = $("#txtMasterRowkey").val() ? getInt($("#txtMasterRowkey").val()) : 0;
+            var objParams = {
+                MasterKey: rowkey,
+                File: $("#txtFileUpload")[0].files
+            }
+            if (rowkey > 0 && objParams.File.length > 0) {
+                CallAjaxUploadDocs(objParams);
+            }
+        }
+
+        function getDataMaster() {
+            let objMData = {};
+            objMData.TransID = TransID;
+            objMData.Rowkey = $('[id$=txtMasterRowkey]').val() ? getInt($('[id$=txtMasterRowkey]').val()) : null;
+            objMData.TransNo = $('[id$=txtTransNo]').val();
+            objMData.TransDate = $('[id$=txtTransDate]').val();
+            objMData.BuildingKey = $("[id=cboBuilding]").combobox("getValue") ? getInt($("[id=cboBuilding]").combobox("getValue")) : null;
+            objMData.DepartmentKey = $("[id=cboDepartment]").combobox("getValue") ? getInt($("[id=cboDepartment]").combobox("getValue")) : null;
+            objMData.PartnerKey = $('[id$=txtPartnerKey]').val() ? getInt($('[id$=txtPartnerKey]').val()) : 0;
+            objMData.PartnerTaxNumber = $('[id$=txtPartnerTaxNumber]').val() ? $('[id$=txtPartnerTaxNumber]').val() : null;
+            objMData.PartnerTaxName = $('[id$=txtPartnerTaxName]').val() ? $('[id$=txtPartnerTaxName]').val() : null;
+            objMData.PartnerTaxAddress = $('[id$=txtPartnerTaxAddress]').val() ? $('[id$=txtPartnerTaxAddress]').val() : null;
+            objMData.TaxTemplateNo = $('[id$=txtTaxTemplateNo]').val() ? $('[id$=txtTaxTemplateNo]').val() : null;
+            objMData.TaxSerialNo = $('[id$=txtTaxSerialNo]').val() ? $('[id$=txtTaxSerialNo]').val() : null;
+            objMData.TaxNo = $('[id$=txtTaxNo]').val() ? $('[id$=txtTaxNo]').val() : null;
+            objMData.TaxDate = $('[id$=txtTaxDate]').val() ? $('[id$=txtTaxDate]').val() : null;
+            objMData.EmployeeKey = $('[id$=txtEmployeeKey]').val() ? $('[id$=txtEmployeeKey]').val() : null;
+            objMData.POSKey = $('[id$=txtPOSKey]').val() ? $('[id$=txtPOSKey]').val() : null;
+            objMData.CashierKey = $('[id$=txtCashierKey]').val() ? $('[id$=txtCashierKey]').val() : null;
+            objMData.Description = $('[id$=txtDescription]').val();
+            //khi tạo phiếu từ phiếu khác
+            objMData.OldTransNo = OldTransNo ? OldTransNo : null;
+            objMData.OldRowkey = OldMasterKey ? getInt(OldMasterKey) : null;
+            objMData.OldTransID = OldTransID ? OldTransID : null;
+            return objMData;
+        }
+
+        function getDataDetail() {
+            //Detail
+            let objDData = [];
+            $("[id=dgVoucherDetail]").datagrid("acceptChanges");
+            let detailData = $("[id=dgVoucherDetail]").datagrid("getData").rows;
+            if (detailData.length > 0) {
+                detailData.forEach(function addDetail(item, index) {
+                    let data = {};
+                    data.DetailRowkey = item.DetailRowkey ? getInt(item.DetailRowkey) : null;
+                    data.MasterRowkey = item.MasterRowkey ? getInt(item.MasterRowkey) : null;
+                    data.ReasonKey = item.ReasonKey ? getInt(item.ReasonKey) : null;
+                    //data.InAmount = item.InAmount ? getFloat(item.InAmount) : 0;
+                    data.OutAmount = item.OutAmount ? getFloat(item.OutAmount) : 0;
+                    data.Description = item.Description;
+                    objDData.push(data);
+                });
+            }
+
+            return objDData;
+        }
+
+        //====================  Tabs Detail  =====================//
+        function BindingDataToGrid(data) {
+            let toolbar = [
+                {
+                    text: "Thêm",
+                    id: "btnAddDetailGrid",
+                    iconCls: "icon-add",
+                    handler: addnewrow
+                },
+                {
+                    text: "Xóa",
+                    id: "btnDelDetailGrid",
+                    iconCls: "icon-remove",
+                    handler: removeit
+                },
+                {
+                    text: "Lưu tạm",
+                    id: "btnSaveTempDetailGrid",
+                    iconCls: "icon-save",
+                    handler: acceptit
+                },
+                {
+                    text: "Quay lại",
+                    id: "btnUndoDetailGrid",
+                    iconCls: "icon-undo",
+                    handler: rejectit
+                }
+            ];
+            editIndex = undefined;
+
+            $("[id=dgVoucherDetail]").datagrid("options").pageNumber = 1;
+            $("[id=dgVoucherDetail]").datagrid({ data: [] });
+            $("[id=dgVoucherDetail]").datagrid({
+                height: 400,
+                width: "100%",
+                rownumbers: true,
+                toolbar: toolbar,
+                autoRowHeight: true,
+                striped: false,
+                iconCls: "icon-list",
+                singleSelect: true,
+                selectOnCheck: false,
+                checkOnSelect: false,
+                singleCheck: false,
+                pagination: false,
+                //loadFilter: pagerFilter,
+                //sortName: "JobSequence",
+                //sortOrder: "asc",
+                data: data,
+                columns: [
+                    [
+                        { field: "DetailRowkey", width: 0, hidden: true },
+                        { field: "MasterRowkey", width: 0, hidden: true },
+                        {
+                            field: 'ReasonKey',
+                            title: 'Loại thu',
+                            width: 250,
+                            formatter: function (value, row) {
+                                return row.ReasonName || value;
+                            },
+                            editor: {
+                                type: 'combotree',
+                                options: {
+                                    valueField: 'id',
+                                    textField: 'text',
+                                    icons: [{
+                                        iconCls: 'icon-clear',
+                                        handler: function (e) {
+                                            $(e.data.target).combotree('clear');
+                                        }
+                                    }],
+                                    readonly: false,
+                                    required: true,
+                                    editable: false,
+                                    data: objCombo.cboReasonData,
+                                    validType: "validCombotreeInGrid['[id$=dgVoucherDetail]', 'ReasonKey']",
+                                    onBeforeSelect: function (node) {
+                                        //check isparent
+                                        if (node.children?.length > 0) {
+                                            return false;
+                                        }
+                                        return true;
+                                    }
+                                }
+                            }
+                        },
+                        {
+                            field: 'OutAmount',
+                            title: 'Số tiền',
+                            formatter: function (value, row) {
+                                return row.OutAmount !== null ? accounting.formatNumber(row.OutAmount) : 0;
+                            },
+                            width: 150,
+                            align: 'right',
+                            editor: { type: 'numberbox', options: { required: false, precision: 0, groupSeparator: ',' } }
+                        },
+                        {
+                            field: "Description",
+                            title: "Mô tả",
+                            width: 200,
+                            editor: {
+                                type: "textbox", options: { required: false, readonly: false }
+                            }
+                        }
+                    ]
+                ],
+                onClickCell: function (index, field, value) {
+                    if (endEditing()) {
+                        $("[id=dgVoucherDetail]").datagrid("selectRow", index).datagrid("beginEdit", index);
+                        var ed = $("[id=dgVoucherDetail]").datagrid("getEditor", { index: index, field: field });
+                        if (ed) {
+                            ($(ed.target).data("textbox") ? $(ed.target).textbox("textbox") : $(ed.target)).focus();
+                        }
+                        editIndex = index;
+                    } else {
+                        setTimeout(function () {
+                            $("[id=dgVoucherDetail]").datagrid("selectRow", editIndex);
+                        },
+                            0);
+                    }
+                },
+                onBeginEdit: function (rowIndex, row) {
+                    editIndex = rowIndex;
+                    lockApprove(true);
+                },
+                onEndEdit: function (index, row) {
+                    var ed = $(this).datagrid('getEditor',
+                        {
+                            index: index,
+                            field: 'ReasonKey'
+                        });
+                    row.ReasonName = $(ed.target).combotree('getText');
+                },
+                onAfterEdit: function (index, row) {
+                    //row.editing = true;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onCancelEdit: function (index, row) {
+                    row.editing = false;
+                    $(this).datagrid("refreshRow", index);
+                },
+                onLoadSuccess: function (data) {
+                },
+                onSelect: function (index, row) {
+                },
+                onUnselect: function (index, row) {
+                }
+            });
+        }
+
+        function endEditing() {
+            if (editIndex == undefined) {
+                return true;
+            }
+            if ($("[id=dgVoucherDetail]").datagrid("validateRow", editIndex)) {
+                $("[id=dgVoucherDetail]").datagrid("endEdit", editIndex);
+                editIndex = undefined;
+                return true;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+        }
+
+        function acceptit() {
+            if (endEditing()) {
+                editIndex = undefined;
+            }
+        }
+
+        function removeit() {
+            if (editIndex !== undefined) {
+                let rowSelected = $("[id=dgVoucherDetail]").datagrid("getRows")[editIndex];
+                if (rowSelected.DetailRowkey > 0) {
+                    $.messager.confirm(VNMessageR.COMMON_00010,
+                        VNMessageR.COMMON_00014,
+                        function (r) {
+                            if (r) {
+                                CallAjaxDeleteDetail(rowSelected.DetailRowkey);
+                            }
+                        });
+                    return false;
+                } else {
+                    toastr.warning(VNMessageR.COMMON_00013);
+                    $("[id=dgVoucherDetail]").datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+                    editIndex = undefined;
+                }
+            }
+            return false;
+        }
+
+        function rejectit() {
+            $("[id=dgVoucherDetail]").datagrid("rejectChanges");
+            editIndex = undefined;
+        }
+
+        function addnewrow() {
+            let isValidForm = ValidateControlForm(requiredList);
+            if (!isValidForm) {
+                toastr.remove();
+                toastr.warning(VNMessageR.COMMON_00001);
+                return false;
+            }
+
+            if (endEditing()) {
+                let count = $("[id=dgVoucherDetail]").datagrid("getRows").length;
+                for (let i = 0; i < count; i++) {
+                    $("[id=dgVoucherDetail]").datagrid("refreshRow", i).datagrid("collapseRow", i);
+                }
+
+                $("[id=dgVoucherDetail]").datagrid("appendRow",
+                    {
+                        DetailRowkey: 0,
+                        MasterRowkey: $('[id$=txtMasterRowkey]').val() || 0,
+                        isAddNewRow: true,
+                    });
+                editIndex = $("[id=dgVoucherDetail]").datagrid("getRows").length - 1;
+                $("[id=dgVoucherDetail]").datagrid("selectRow", editIndex).datagrid("beginEdit", editIndex);
+
+            }
+            return false;
+        }
+
+        function initButton(key) {
+            if (key > 0) {
+                $("[id=divCreate]").css("display", "none");
+                $("[id=divUpdate]").css("display", "");
+                $("[id=divDelete]").css("display", "");
+                $("[id=divRestore]").css("display", "");
+                $("[id=divApprove]").css("display", "");
+                $("[id=divReject]").css("display", "");
+            } else {
+                $("[id=divCreate]").css("display", "");
+                $("[id=divUpdate]").css("display", "none");
+                $("[id=divDelete]").css("display", "none");
+                $("[id=divRestore]").css("display", "none");
+                $("[id=divApprove]").css("display", "none");
+                $("[id=divReject]").css("display", "none");
+            }
+        }
+
+        function resetFormData() {
+            $("[id=formEntry]").find("input[type=text],input[type=number], textarea").val("");
+            $("[id=formEntry]").find("input[type=checkbox]").prop("checked", true);
+            $('[id$=cboBuilding').combobox('setValue', null);
+            $('[id$=cboDepartment').combobox('setValue', null);
+            $('[id$=cboPartner').combobox('setValue', null);
+            var fileUpload = document.getElementById('txtFileUpload');
+            fileUpload.value = '';
+            fileUpload.dispatchEvent(new Event('change'));
+            //reload datagrid
+            BindingDataToGrid([]);
+            $("#divUploadDocuments").html("");
+            if (MasterKey > 0)
+                $("#frmDocument").css("display", "block");
+            else
+                $("#frmDocument").css("display", "none");
+            lockApprove(false);
+        };
+
+        function setFormData(data) {
+            initButton(data.Rowkey);
+            $('[id$=txtMasterRowkey]').val(data.Rowkey);
+            $('[id$=txtTransNo]').val(data.TransNo);
+            $('[id$=txtTransDate]').val(data.TransDate);
+            $('[id$=txtTaxTemplateNo]').val(data.TaxTemplateNo);
+            $('[id$=txtTaxSerialNo]').val(data.TaxSerialNo);
+            $('[id$=txtTaxNo]').val(data.TaxNo);
+            $('[id$=txtTaxDate]').val(data.TaxDate);
+            $('[id$=txtEmployeeKey]').val(data.EmployeeKey);
+            $('[id$=txtPOSKey]').val(data.POSKey);
+            $('[id$=txtCashierKey]').val(data.CashierKey);
+            $('[id$=txtDescription]').val(data.Description);
+            $("[id$=cboBuilding]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboBuilding').combobox('setValue', data.BuildingKey);
+                }
+            });
+            $("[id$=cboDepartment]").combobox({
+                onLoadSuccess: function () {
+                    $('[id$=cboDepartment').combobox('setValue', data.DepartmentKey);
+                }
+            });
+            var objPartner = {
+                id: data.PartnerKey,
+                namecompare: `${data.PartnerKey} , ${data.PartnerName}`
+            };
+            objCombo.cboPartnerData.push(objPartner);
+            $('#cboPartner').combobox({
+                data: objCombo.cboPartnerData,
+                onLoadSuccess: function () {
+                    $('#cboPartner').combobox('setValue', data.PartnerKey);
+                }
+            });
+            setTimeout(function () {
+                $('[id$=txtPartnerTaxNumber]').val(data.PartnerTaxNumber);
+                $('[id$=txtPartnerTaxName]').val(data.PartnerTaxName);
+                $('[id$=txtPartnerTaxAddress]').val(data.PartnerTaxAddress);
+            }, 200);
+        };
+
+        function onDeleteFileUpload(e, id, masterKey) {
+            e.preventDefault();
+            if (id) {
+                $.messager.confirm(VNMessageR.COMMON_00010,
+                    VNMessageR.COMMON_00014,
+                    function (r) {
+                        if (r) {
+                            ajaxindicatorstart(VNMessageR.COMMON_00011);
+                            $.ajax({
+                                type: "DELETE",
+                                url: "/VoucherReceipts/DeleteFileUpload/" + id,
+                                headers: { 'FunctionID': FunctionID },
+                                dataType: "json",
+                                success: function (msg) {
+                                    ajaxindicatorstop();
+                                    if (msg.Success) {
+                                        toastr.success(VNMessageR.COMMON_00012);
+                                        setTimeout(function () {
+                                            onGetDocumentByKey(masterKey);
+                                        },
+                                            200);
+                                    } else {
+                                        ToastrErr(msg);
+                                    }
+                                },
+                                error: function (err) {
+                                    ToastrException(err);
+                                    ajaxindicatorstop();
+                                }
+                            });
+                        }
+                    });
+                return false;
+            } else {
+                toastr.warning(VNMessageR.COMMON_00013);
+            }
+        }
+
+        //Ajax call API
+        function CallAjaxSave(mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: mode === "Create" ? "POST" : "PUT",
+                    url: "/VoucherPayments/" + mode,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        if (msg.Success) {
+                            switch (mode) {
+                                case "Create":
+                                    toastr.success(VNMessageR.COMMON_00002);
+                                    //$('#voucherModal').modal('hide');
+                                    setTimeout(function () {
+                                        window.OpenNewUrlOnIframe("edit", FunctionID, msg.Data, null);
+                                        //reload current page
+                                        $("#tblVoucher").DataTable().ajax.reload(null, false);
+                                    },
+                                        500);
+                                    break;
+                                case "Update":
+                                    toastr.success(VNMessageR.COMMON_00003);
+                                    //$('#voucherModal').modal('hide');
+                                    setTimeout(function () {
+                                        window.ReloadUrlOnIframe();
+                                        //reload current page
+                                        $("#tblVoucher").DataTable().ajax.reload(null, false);
+                                    },
+                                        500);
+                                    break;
+                            };
+                        } else {
+                            ToastrErr(msg);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxDeleteDetail(id) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: "DELETE",
+                    url: "/VoucherPayments/DeleteDetail/" + id,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    success: function (msg) {
+                        if (msg.Success) {
+                            toastr.success(VNMessageR.COMMON_00012);
+                            $("[id=dgVoucherDetail]").datagrid('cancelEdit', editIndex).datagrid('deleteRow', editIndex);
+                            editIndex = undefined;
+                        } else {
+                            ToastrErr(msg);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxUpdate(type, mode, objData) {
+            try {
+                ajaxindicatorstart(VNMessageR.COMMON_00011);
+                $.ajax({
+                    type: type,
+                    url: `/VoucherPayments/${mode}`,
+                    headers: { 'FunctionID': FunctionID },
+                    dataType: "json",
+                    contentType: "application/json;",
+                    data: JSON.stringify(objData),
+                    success: function (msg) {
+                        if (msg.Success) {
+                            let key = 0;
+                            switch (mode) {
+                                case "Approve":
+                                    toastr.success(VNMessageR.COMMON_00018);
+                                    key = objData.ApprovedKey;
+                                    break;
+                                case "Reject":
+                                    toastr.success(VNMessageR.COMMON_00019);
+                                    key = objData.ApprovedKey;
+                                    break;
+                                case "Delete":
+                                    toastr.success(VNMessageR.COMMON_00012);
+                                    key = objData.DeletedKey;
+                                    break;
+                                case "Restore":
+                                    toastr.success(VNMessageR.COMMON_00023);
+                                    key = objData.DeletedKey;
+                                    break;
+                            };
+                            setTimeout(function () {
+                                window.ReloadUrlOnIframe();
+                                //reload current page
+                                $("#tblVoucher").DataTable().ajax.reload(null, false);
+                            },
+                                500);
+                        } else {
+                            ToastrErr(msg);
+                        }
+                        ajaxindicatorstop();
+                    },
+                    error: function (err) {
+                        ToastrException(err);
+                        ajaxindicatorstop();
+                    }
+                });
+            } catch (err) {
+                toastr.error(err);
+                ajaxindicatorstop();
+            }
+        }
+
+        function CallAjaxUploadDocs(objParams) {
+            var formData = new FormData();
+            formData.append('MasterKey', objParams.MasterKey);
+            formData.append('TransID', TransID);
+            if (objParams.File.length > 0) {
+                $(objParams.File).each(function (i, vf) {
+                    formData.append('file' + i, vf, vf.name);
+                });
+            };
+            ajaxindicatorstart(VNMessageR.COMMON_00011);
+            $.ajax({
+                type: 'POST',
+                headers: { 'FunctionID': FunctionID },
+                url: "/VoucherPayments/UploadFiles",
+                dataType: 'json',
+                data: formData,
+                contentType: false,
+                processData: false,
+                success: function (msg) {
+                    if(msg.Success) {
+                        toastr.success(VNMessageR.COMMON_00017);
+                        setTimeout(function () {
+                            onGetDocumentByKey(objParams.MasterKey);
+                        },
+                            500);
+                    } else {
+                        ToastrErr(msg);
+                    }
+                    ajaxindicatorstop();
+                },
+                error: function (err) {
+                    ToastrException(err);
+                    ajaxindicatorstop();
+                }
+            });
+        }
+
+    </script>
+}

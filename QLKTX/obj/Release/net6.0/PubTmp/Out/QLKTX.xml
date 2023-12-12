@@ -1,0 +1,252 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QLKTX</name>
+    </assembly>
+    <members>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllUserGroup(System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox User Group
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllModule">
+            <summary>
+                Get data combobox module
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllUserAccount(System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox useraccount
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllBuilding(System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox building
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllBuildingSection(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox building-section
+            </summary>
+            <param name="key"></param>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllDepartment(System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox Department
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllDepartmentByBuilding(System.Int32,System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox Department by building
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllDepartmentByBuilding2(System.Int32,System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox Department by building
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllRecordType(System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox RecordType
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllPartner(System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox Partner
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllContractDeclare(System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32},System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox ContractDeclare
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllCategory(System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox category
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllDepartmentByBuilding3(System.Int32,System.Nullable{System.Int32},System.String,System.Int32,System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox department by contract
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllLevelCompanyStructure(System.Int32)">
+            <summary>
+                Get data combotree LevelCompanyStructure
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllCompanyStructure(System.Int32)">
+            <summary>
+                Get data combotree CompanyStructure
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllPartnerGroup(System.Int32)">
+            <summary>
+                Get data combotree CompanyStructure
+            </summary>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllReason(System.String,System.Nullable{System.Int32})">
+            <summary>
+                Get data combotree reason
+            </summary>
+            <param name="typeId"></param>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAllReasonByTransID(System.String,System.Nullable{System.Int32})">
+            <summary>
+                Get data combotree reason by transId
+            </summary>
+            <param name="transId"></param>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonController.FindAutocomplexPartner(System.Int32,System.String)">
+            <summary>
+                Get data autocomplex Partner
+            </summary>
+            <param name="prefix"></param>
+            <param name="buildingKey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QLKTX.Controllers.CommonPermissController.FindAllBuilding(System.Int32,System.Nullable{System.Int32})">
+            <summary>
+                Get data combobox building
+            </summary>
+            <param name="functionId"></param>
+            <param name="active"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfPayments">
+             <summary>
+            Represents a strongly typed in-memory cache of data.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfPayments.ds_StatisticsOfPaymentsDataTable">
+             <summary>
+            Represents the strongly named DataTable class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfPayments.ds_StatisticsOfPaymentsRow">
+             <summary>
+            Represents strongly named DataRow class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfPayments.ds_StatisticsOfPaymentsRowChangeEvent">
+             <summary>
+            Row event argument class
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfReceipts">
+             <summary>
+            Represents a strongly typed in-memory cache of data.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfReceipts.ds_StatisticsOfReceiptsDataTable">
+             <summary>
+            Represents the strongly named DataTable class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfReceipts.ds_StatisticsOfReceiptsRow">
+             <summary>
+            Represents strongly named DataRow class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_StatisticsOfReceipts.ds_StatisticsOfReceiptsRowChangeEvent">
+             <summary>
+            Row event argument class
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_SummaryVoucherReport">
+             <summary>
+            Represents a strongly typed in-memory cache of data.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_SummaryVoucherReport.ds_SummaryVoucherDataTable">
+             <summary>
+            Represents the strongly named DataTable class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_SummaryVoucherReport.ds_SummaryVoucherRow">
+             <summary>
+            Represents strongly named DataRow class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_SummaryVoucherReport.ds_SummaryVoucherRowChangeEvent">
+             <summary>
+            Row event argument class
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDetail">
+             <summary>
+            Represents a strongly typed in-memory cache of data.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDetail.ds_VoucherDetailDataTable">
+             <summary>
+            Represents the strongly named DataTable class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDetail.ds_VoucherDetailRow">
+             <summary>
+            Represents strongly named DataRow class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDetail.ds_VoucherDetailRowChangeEvent">
+             <summary>
+            Row event argument class
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDReasonReport">
+             <summary>
+            Represents a strongly typed in-memory cache of data.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDReasonReport.ds_VoucherDReasonReportDataTable">
+             <summary>
+            Represents the strongly named DataTable class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDReasonReport.ds_VoucherDReasonReportRow">
+             <summary>
+            Represents strongly named DataRow class.
+            </summary>
+        </member>
+        <member name="T:QLKTX.Dataset.ds_VoucherDReasonReport.ds_VoucherDReasonReportRowChangeEvent">
+             <summary>
+            Row event argument class
+            </summary>
+        </member>
+    </members>
+</doc>

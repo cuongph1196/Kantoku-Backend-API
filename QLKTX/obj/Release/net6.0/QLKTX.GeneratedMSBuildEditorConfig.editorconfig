@@ -1,0 +1,300 @@
+is_global = true
+build_property.TargetFramework = net6.0
+build_property.TargetPlatformMinVersion = 
+build_property.UsingMicrosoftNETSdkWeb = true
+build_property.ProjectTypeGuids = 
+build_property.InvariantGlobalization = 
+build_property.PlatformNeutralAssembly = 
+build_property._SupportedPlatformList = Linux,macOS,Windows
+build_property.RootNamespace = QLKTX
+build_property.RootNamespace = QLKTX
+build_property.ProjectDir = D:\OUTSOURCE\QLKTX_WEB\qlktx\QLKTX\
+build_property.RazorLangVersion = 6.0
+build_property.SupportLocalizedComponentNames = 
+build_property.GenerateRazorMetadataSourceChecksumAttributes = 
+build_property.MSBuildProjectDirectory = D:\OUTSOURCE\QLKTX_WEB\qlktx\QLKTX
+build_property._RazorSourceGeneratorDebug = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ApiLog/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBpTG9nXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ApprovedContract/ApprovedContractEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwcm92ZWRDb250cmFjdFxBcHByb3ZlZENvbnRyYWN0RW50cnkuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ApprovedContract/ContractEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwcm92ZWRDb250cmFjdFxDb250cmFjdEVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ApprovedContract/ContractView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwcm92ZWRDb250cmFjdFxDb250cmFjdFZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ApprovedContract/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQXBwcm92ZWRDb250cmFjdFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Building/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQnVpbGRpbmdcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Category/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2F0ZWdvcnlcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ClearsEmpDebtReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xlYXJzRW1wRGVidFJlcG9ydFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ClosingDate/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2xvc2luZ0RhdGVcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/CompanyStructure/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29tcGFueVN0cnVjdHVyZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ContractDeclare/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3REZWNsYXJlXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ContractDeclare/SampleContract.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3REZWNsYXJlXFNhbXBsZUNvbnRyYWN0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ContractDetailReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3REZXRhaWxSZXBvcnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ContractExpires/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RFeHBpcmVzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ContractStatisticsReasonReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RTdGF0aXN0aWNzUmVhc29uUmVwb3J0XEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/ContractStatisticsReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RTdGF0aXN0aWNzUmVwb3J0XEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Contract/ContractEntryNew.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RcQ29udHJhY3RFbnRyeU5ldy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Contract/ContractView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RcQ29udHJhY3RWaWV3LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Contract/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ29udHJhY3RcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/CustomerDebtOverview/CustomerDebtOverviewEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJEZWJ0T3ZlcnZpZXdcQ3VzdG9tZXJEZWJ0T3ZlcnZpZXdFbnRyeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/CustomerDebtOverview/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ3VzdG9tZXJEZWJ0T3ZlcnZpZXdcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DebtExpires/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVidEV4cGlyZXNcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DebtPayment/DebtPaymentEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVidFBheW1lbnRcRGVidFBheW1lbnRFbnRyeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DebtPayment/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVidFBheW1lbnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DebtReceipt/DebtReceiptEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVidFJlY2VpcHRcRGVidFJlY2VpcHRFbnRyeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DebtReceipt/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVidFJlY2VpcHRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DepartmentLocation/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVwYXJ0bWVudExvY2F0aW9uXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DepartmentReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVwYXJ0bWVudFJlcG9ydFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Department/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVwYXJ0bWVudFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/DeptLocationExpires/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRGVwdExvY2F0aW9uRXhwaXJlc1xJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/FunctionList/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcRnVuY3Rpb25MaXN0XEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Home/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxMb2dpbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/PartnerGroup/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFydG5lckdyb3VwXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Partner/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGFydG5lclxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Permission/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUGVybWlzc2lvblxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/PosDevice/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUG9zRGV2aWNlXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/PosVoucherReceipts/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUG9zVm91Y2hlclJlY2VpcHRzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/PosVoucherReceipts/PosVoucherReceiptsEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUG9zVm91Y2hlclJlY2VpcHRzXFBvc1ZvdWNoZXJSZWNlaXB0c0VudHJ5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Reason/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUmVhc29uXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Shared/Components/FunctionMenu/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcRnVuY3Rpb25NZW51XERlZmF1bHQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Shared/Components/ModuleMenu/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcTW9kdWxlTWVudVxEZWZhdWx0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Shared/Components/UploadDocuments/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXENvbXBvbmVudHNcVXBsb2FkRG9jdW1lbnRzXERlZmF1bHQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Shared/_LayoutEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXRFbnRyeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/StatisticsOfPaymentsReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RhdGlzdGljc09mUGF5bWVudHNSZXBvcnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/StatisticsOfReceiptsReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3RhdGlzdGljc09mUmVjZWlwdHNSZXBvcnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/SummaryVoucherReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU3VtbWFyeVZvdWNoZXJSZXBvcnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/TagConfig/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVGFnQ29uZmlnXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/UserAccount/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckFjY291bnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/UserGroup/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckdyb3VwXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/UserInfo/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlckluZm9cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherClearsEmpDebt/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlckNsZWFyc0VtcERlYnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherClearsEmpDebt/VCEDEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlckNsZWFyc0VtcERlYnRcVkNFREVudHJ5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherDetailReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlckRldGFpbFJlcG9ydFxJbmRleC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherDReasonReport/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlckRSZWFzb25SZXBvcnRcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherEPTM/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlckVQVE1cSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherEPTM/VEPTMEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlckVQVE1cVkVQVE1FbnRyeS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherPayments/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclBheW1lbnRzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherPayments/VoucherPaymentsEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclBheW1lbnRzXFZvdWNoZXJQYXltZW50c0VudHJ5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherPaysToComp/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclBheXNUb0NvbXBcSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherPaysToComp/PrintVoucherPay.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclBheXNUb0NvbXBcUHJpbnRWb3VjaGVyUGF5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherPaysToComp/VPTCEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclBheXNUb0NvbXBcVlBUQ0VudHJ5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherReceipts/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclJlY2VpcHRzXEluZGV4LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherReceipts/PrintVoucher.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclJlY2VpcHRzXFByaW50Vm91Y2hlci5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/VoucherReceipts/VoucherReceiptsEntry.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVm91Y2hlclJlY2VpcHRzXFZvdWNoZXJSZWNlaXB0c0VudHJ5LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[D:/OUTSOURCE/QLKTX_WEB/qlktx/QLKTX/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-e129i5x3dn
